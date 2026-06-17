@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, Input, Textarea } from '@tarojs/components';
+import { View, Text, Input, Textarea, Picker } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useAppStore } from '@/store';
 import { formatPrice, formatDateTime } from '@/utils';
@@ -17,6 +17,8 @@ const ExpressPage: React.FC = () => {
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [signRemark, setSignRemark] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
+  const [completeDate, setCompleteDate] = useState('');
+  const [completeTime, setCompleteTime] = useState('');
 
   const urgentPending = useMemo(() => {
     return orders.filter(o => o.isUrgent && ['待配送', '配送中', '定制中'].includes(o.status));
@@ -47,18 +49,32 @@ const ExpressPage: React.FC = () => {
 
   const handleOpenComplete = (order: Order) => {
     setCurrentOrder(order);
-    setSignRemark('');
-    setDeliveryFee('0');
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    if (order.deliverCompleteTime) {
+      const [date, time] = order.deliverCompleteTime.split(' ');
+      setCompleteDate(date);
+      setCompleteTime(time.substring(0, 5));
+    } else {
+      setCompleteDate(`${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`);
+      setCompleteTime(`${pad(now.getHours())}:${pad(now.getMinutes())}`);
+    }
+    setSignRemark(order.signRemark || '');
+    setDeliveryFee(order.deliveryFee?.toString() || '0');
     setShowCompleteModal(true);
   };
 
   const handleCompleteDelivery = () => {
     if (!currentOrder) return;
     const fee = parseFloat(deliveryFee) || 0;
+    const deliverCompleteTime = completeDate && completeTime
+      ? `${completeDate} ${completeTime}:00`
+      : undefined;
     completeDelivery({
       orderId: currentOrder.id,
       signRemark: signRemark.trim() || undefined,
-      deliveryFee: fee
+      deliveryFee: fee,
+      deliverCompleteTime
     });
     setShowCompleteModal(false);
     Taro.showToast({ title: '配送已完成', icon: 'success' });
@@ -229,7 +245,13 @@ const ExpressPage: React.FC = () => {
             className={classnames(styles.actionBtn, styles.viewDetailBtn)}
             onClick={(e) => { e.stopPropagation(); goDetail(order.id); }}
           >
-            📋 查看订单详情
+            📋 详情
+          </View>
+          <View
+            className={classnames(styles.actionBtn, styles.primaryBtn)}
+            onClick={(e) => { e.stopPropagation(); handleOpenComplete(order); }}
+          >
+            ✏️ 修改
           </View>
         </View>
       )}
@@ -296,10 +318,38 @@ const ExpressPage: React.FC = () => {
         <View className={styles.modalMask}>
           <View className={styles.modalContent}>
             <View className={styles.modalHeader}>
-              <Text className={styles.modalTitle}>配送完成 - {currentOrder.orderNo}</Text>
+              <Text className={styles.modalTitle}>
+                {currentOrder.status === '已完成' ? '修改配送信息' : '配送完成'} - {currentOrder.orderNo}
+              </Text>
               <Text className={styles.modalClose} onClick={() => setShowCompleteModal(false)}>✕</Text>
             </View>
             <View className={styles.modalBody}>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>实际送达日期</Text>
+                <Picker
+                  mode='date'
+                  value={completeDate}
+                  onChange={(e) => setCompleteDate(e.detail.value as string)}
+                >
+                  <View className={styles.formInput}>
+                    <Text>{completeDate || '请选择送达日期'}</Text>
+                    <Text style={{ color: '#8A7A6A' }}>📅</Text>
+                  </View>
+                </Picker>
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>实际送达时间</Text>
+                <Picker
+                  mode='time'
+                  value={completeTime}
+                  onChange={(e) => setCompleteTime(e.detail.value as string)}
+                >
+                  <View className={styles.formInput}>
+                    <Text>{completeTime || '请选择送达时间'}</Text>
+                    <Text style={{ color: '#8A7A6A' }}>⏰</Text>
+                  </View>
+                </Picker>
+              </View>
               <View className={styles.formRow}>
                 <Text className={styles.formLabel}>签收备注</Text>
                 <Textarea
@@ -325,7 +375,7 @@ const ExpressPage: React.FC = () => {
                 取消
               </View>
               <View className={styles.confirmBtn} onClick={handleCompleteDelivery}>
-                确认完成
+                {currentOrder.status === '已完成' ? '保存修改' : '确认完成'}
               </View>
             </View>
           </View>

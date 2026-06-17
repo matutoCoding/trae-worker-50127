@@ -105,6 +105,7 @@ interface AppState {
     orderId: string;
     signRemark?: string;
     deliveryFee?: number;
+    deliverCompleteTime?: string;
   }) => void;
 
   handleReturn: (params: {
@@ -230,6 +231,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const newOrder: Order = {
       id: generateId('o'),
       orderNo: generateOrderNo(),
+      orderType: '定制',
       customerName,
       customerPhone,
       address,
@@ -291,18 +293,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     get().persist();
   },
 
-  completeDelivery: ({ orderId, signRemark, deliveryFee = 0 }) => {
+  completeDelivery: ({ orderId, signRemark, deliveryFee = 0, deliverCompleteTime }) => {
     const order = get().orders.find(o => o.id === orderId);
     if (!order) return;
 
     const now = new Date();
+    const completeTime = deliverCompleteTime || formatDateTime(now);
     set({
       orders: get().orders.map(o =>
         o.id === orderId
           ? {
               ...o,
               status: '已完成' as const,
-              deliverCompleteTime: formatDateTime(now),
+              deliverCompleteTime: completeTime,
               signRemark,
               deliveryFee
             }
@@ -313,7 +316,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (deliveryFee > 0) {
       const deliveryBill: BillRecord = {
         id: generateId('b'),
-        date: formatDate(now),
+        date: completeTime.split(' ')[0],
         type: '收入',
         category: '配送服务',
         amount: deliveryFee,

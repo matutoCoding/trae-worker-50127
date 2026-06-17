@@ -16,7 +16,10 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onClick }) => {
   return (
     <View className={styles.card} onClick={onClick}>
       <View className={styles.header}>
-        <Text className={styles.orderNo}>订单号：{order.orderNo}</Text>
+        <View className={styles.headerLeft}>
+          <Text className={styles.orderNo}>订单号：{order.orderNo}</Text>
+          <Text className={styles.orderTypeTag}>{order.orderType}单</Text>
+        </View>
         <View className={styles.statusWrap}>
           {order.isUrgent && <Text className={styles.urgentTag}>急单</Text>}
           <Text

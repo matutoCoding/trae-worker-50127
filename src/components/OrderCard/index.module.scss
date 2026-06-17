@@ -22,9 +22,25 @@
   border-bottom: 1rpx solid $color-divider;
 }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
 .orderNo {
   font-size: $font-size-sm;
   color: $color-text-secondary;
+}
+
+.orderTypeTag {
+  display: inline-block;
+  padding: 2rpx 10rpx;
+  background: rgba(74, 55, 40, 0.08);
+  color: $color-primary-dark;
+  font-size: 20rpx;
+  border-radius: $radius-xs;
+  font-weight: $font-weight-medium;
 }
 
 .statusWrap {

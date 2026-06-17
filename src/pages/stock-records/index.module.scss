@@ -479,6 +479,18 @@
   display: block;
 }
 
+.expandBtn {
+  padding: $spacing-xs $spacing-md;
+  background: rgba(74, 55, 40, 0.1);
+  color: $color-primary-dark;
+  font-size: $font-size-xs;
+  border-radius: $radius-sm;
+  font-weight: $font-weight-medium;
+  margin-left: $spacing-sm;
+  white-space: nowrap;
+  align-self: center;
+}
+
 .dateRangeRow {
   display: flex;
   align-items: center;

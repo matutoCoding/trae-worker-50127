@@ -41,6 +41,7 @@ export interface OrderItem {
 export interface Order {
   id: string;
   orderNo: string;
+  orderType: '定制' | '销售';
   customerName: string;
   customerPhone: string;
   address: string;
@@ -67,7 +68,7 @@ export interface Order {
     type: '退货' | '换货' | null;
     reason: string;
     handleTime?: string;
-    refundAmount?: number;
+ refundAmount?: number;
   };
 }
 

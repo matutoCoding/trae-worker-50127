@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Input, Textarea } from '@tarojs/components';
+import { View, Text, Input, Textarea, Picker } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { useAppStore } from '@/store';
 import { formatPrice, formatDateTime } from '@/utils';
@@ -26,6 +26,8 @@ const OrderDetailPage: React.FC = () => {
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [signRemark, setSignRemark] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
+  const [completeDate, setCompleteDate] = useState('');
+  const [completeTime, setCompleteTime] = useState('');
 
   const order = useMemo(() => orders.find(o => o.id === orderId), [orders, orderId]);
 
@@ -87,7 +89,11 @@ const OrderDetailPage: React.FC = () => {
         ];
       case '配送中':
         return [
-          { label: '配送完成', className: styles.btnSuccess, action: () => setShowCompleteModal(true) }
+          { label: '配送完成', className: styles.btnSuccess, action: () => handleOpenComplete() }
+        ];
+      case '已完成':
+        return [
+          { label: '修改配送信息', className: styles.btnSecondary, action: () => handleEditCompleteInfo() }
         ];
       case '退换中':
         return [
@@ -192,15 +198,40 @@ const OrderDetailPage: React.FC = () => {
     });
   };
 
+  const handleOpenComplete = () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    setCompleteDate(`${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`);
+    setCompleteTime(`${pad(now.getHours())}:${pad(now.getMinutes())}`);
+    setSignRemark('');
+    setDeliveryFee('0');
+    setShowCompleteModal(true);
+  };
+
   const handleCompleteDelivery = () => {
     const fee = parseFloat(deliveryFee) || 0;
+    const deliverCompleteTime = completeDate && completeTime
+      ? `${completeDate} ${completeTime}:00`
+      : undefined;
     completeDelivery({
       orderId: order.id,
       signRemark: signRemark.trim() || undefined,
-      deliveryFee: fee
+      deliveryFee: fee,
+      deliverCompleteTime
     });
     setShowCompleteModal(false);
     Taro.showToast({ title: '配送已完成', icon: 'success' });
+  };
+
+  const handleEditCompleteInfo = () => {
+    if (order.deliverCompleteTime) {
+      const [date, time] = order.deliverCompleteTime.split(' ');
+      setCompleteDate(date);
+      setCompleteTime(time.substring(0, 5));
+    }
+    setSignRemark(order.signRemark || '');
+    setDeliveryFee(order.deliveryFee?.toString() || '0');
+    setShowCompleteModal(true);
   };
 
   const sizeLabels: Record<string, string> = {
@@ -511,51 +542,91 @@ const OrderDetailPage: React.FC = () => {
             <Text className={styles.sectionTitle}>
               <Text className={styles.sectionIcon}>💰</Text>
               费用明细
+              <Text className={styles.orderTypeTag}>{order.orderType}单</Text>
             </Text>
-            <View className={styles.priceRow}>
-              <Text className={styles.priceLabel}>商品小计</Text>
-              <Text className={styles.priceValue}>{formatPrice(itemsTotal)}</Text>
-            </View>
-            {order.materialNames && order.materialNames.length > 0 && (
-              <View className={styles.priceRow}>
-                <Text className={styles.priceLabel}>材质费用（{order.materialNames.length}种）</Text>
-                <Text className={styles.priceValue}>{formatPrice(materialFee)}</Text>
-              </View>
+            {order.orderType === '销售' ? (
+              <>
+                <View className={styles.priceRow}>
+                  <Text className={styles.priceLabel}>商品总价</Text>
+                  <Text className={styles.priceValue}>{formatPrice(itemsTotal)}</Text>
+                </View>
+                {deliveryFeeActual > 0 && (
+                  <View className={styles.priceRow}>
+                    <Text className={styles.priceLabel}>
+                      配送费用
+                      <Text className={classnames(styles.feeTag, styles.feeTagDelivery)}>配送</Text>
+                    </Text>
+                    <Text className={styles.priceValue} style={{ color: '#4A6B8A', fontWeight: 600 }}>
+                      +{formatPrice(deliveryFeeActual)}
+                    </Text>
+                  </View>
+                )}
+                <View className={styles.priceTotal}>
+                  <Text className={styles.priceLabel}>
+                    实收总额
+                    {deliveryFeeActual > 0 && <Text className={classnames(styles.feeTag, styles.feeTagDelivery)}>含配送费</Text>}
+                  </Text>
+                  <Text className={styles.priceValue}>{formatPrice(finalTotal)}</Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <View className={styles.priceRow}>
+                  <Text className={styles.priceLabel}>商品小计</Text>
+                  <Text className={styles.priceValue}>{formatPrice(itemsTotal)}</Text>
+                </View>
+                {materialFee > 0 && (
+                  <View className={styles.priceRow}>
+                    <Text className={styles.priceLabel}>
+                      材质费用
+                      {order.materialNames && order.materialNames.length > 0 && (
+                        <Text className={styles.feeTag}>{order.materialNames.length}种</Text>
+                      )}
+                    </Text>
+                    <Text className={styles.priceValue}>{formatPrice(materialFee)}</Text>
+                  </View>
+                )}
+                <View className={styles.priceRow}>
+                  <Text className={styles.priceLabel}>定制服务费</Text>
+                  <Text className={styles.priceValue}>{formatPrice(customFee)}</Text>
+                </View>
+                {urgentFee > 0 && (
+                  <View className={styles.priceRow}>
+                    <Text className={styles.priceLabel}>
+                      加急费用
+                      <Text className={classnames(styles.feeTag, styles.feeTagUrgent)}>急单</Text>
+                    </Text>
+                    <Text className={styles.priceValue} style={{ color: '#A33D3D', fontWeight: 600 }}>
+                      +{formatPrice(urgentFee)}
+                    </Text>
+                  </View>
+                )}
+                {deliveryFeeActual > 0 && (
+                  <View className={styles.priceRow}>
+                    <Text className={styles.priceLabel}>
+                      配送费用
+                      <Text className={classnames(styles.feeTag, styles.feeTagDelivery)}>配送</Text>
+                    </Text>
+                    <Text className={styles.priceValue} style={{ color: '#4A6B8A', fontWeight: 600 }}>
+                      +{formatPrice(deliveryFeeActual)}
+                    </Text>
+                  </View>
+                )}
+                <View className={styles.priceTotal}>
+                  <Text className={styles.priceLabel}>
+                    订单总金额
+                    {order.isUrgent && <Text className={classnames(styles.feeTag, styles.feeTagUrgent)}>含加急费</Text>}
+                    {deliveryFeeActual > 0 && <Text className={classnames(styles.feeTag, styles.feeTagDelivery)}>含配送费</Text>}
+                  </Text>
+                  <Text className={styles.priceValue}>{formatPrice(finalTotal)}</Text>
+                </View>
+                <View className={styles.priceVerify}>
+                  <Text className={styles.priceVerifyText}>
+                    验证：{itemsTotal} {materialFee > 0 ? `+ ${materialFee} ` : ''}+ {customFee} {urgentFee > 0 ? `+ ${urgentFee} ` : ''}{deliveryFeeActual > 0 ? `+ ${deliveryFeeActual} ` : ''}= {finalTotal} ✓
+                  </Text>
+                </View>
+              </>
             )}
-            <View className={styles.priceRow}>
-              <Text className={styles.priceLabel}>定制服务费</Text>
-              <Text className={styles.priceValue}>{formatPrice(customFee)}</Text>
-            </View>
-            {urgentFee > 0 && (
-              <View className={styles.priceRow}>
-                <Text className={styles.priceLabel}>
-                  加急费用
-                  <Text className={classnames(styles.feeTag, styles.feeTagUrgent)}>急单</Text>
-                </Text>
-                <Text className={styles.priceValue} style={{ color: '#A33D3D', fontWeight: 600 }}>
-                  +{formatPrice(urgentFee)}
-                </Text>
-              </View>
-            )}
-            {deliveryFeeActual > 0 && (
-              <View className={styles.priceRow}>
-                <Text className={styles.priceLabel}>
-                  配送费用
-                  <Text className={classnames(styles.feeTag, styles.feeTagDelivery)}>配送</Text>
-                </Text>
-                <Text className={styles.priceValue} style={{ color: '#4A6B8A', fontWeight: 600 }}>
-                  +{formatPrice(deliveryFeeActual)}
-                </Text>
-              </View>
-            )}
-            <View className={styles.priceTotal}>
-              <Text className={styles.priceLabel}>
-                订单总金额
-                {order.isUrgent && <Text className={classnames(styles.feeTag, styles.feeTagUrgent)}>含加急费</Text>}
-                {deliveryFeeActual > 0 && <Text className={classnames(styles.feeTag, styles.feeTagDelivery)}>含配送费</Text>}
-              </Text>
-              <Text className={styles.priceValue}>{formatPrice(finalTotal)}</Text>
-            </View>
           </View>
         </>
       )}
@@ -667,15 +738,41 @@ const OrderDetailPage: React.FC = () => {
         <View className={styles.modalMask}>
           <View className={styles.modalContent}>
             <View className={styles.modalHeader}>
-              <Text className={styles.modalTitle}>配送完成</Text>
+              <Text className={styles.modalTitle}>{order.status === '已完成' ? '修改配送信息' : '配送完成'}</Text>
               <Text className={styles.modalClose} onClick={() => setShowCompleteModal(false)}>✕</Text>
             </View>
             <View className={styles.modalBody}>
               <View className={styles.formRow}>
+                <Text className={styles.formLabel}>实际送达日期</Text>
+                <Picker
+                  mode='date'
+                  value={completeDate}
+                  onChange={(e) => setCompleteDate(e.detail.value as string)}
+                >
+                  <View className={styles.formInput}>
+                    <Text>{completeDate || '请选择送达日期'}</Text>
+                    <Text style={{ color: '#8A7A6A' }}>📅</Text>
+                  </View>
+                </Picker>
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>实际送达时间</Text>
+                <Picker
+                  mode='time'
+                  value={completeTime}
+                  onChange={(e) => setCompleteTime(e.detail.value as string)}
+                >
+                  <View className={styles.formInput}>
+                    <Text>{completeTime || '请选择送达时间'}</Text>
+                    <Text style={{ color: '#8A7A6A' }}>⏰</Text>
+                  </View>
+                </Picker>
+              </View>
+              <View className={styles.formRow}>
                 <Text className={styles.formLabel}>签收备注</Text>
                 <Textarea
                   className={styles.formTextarea}
-                  placeholder='请输入签收情况说明，如本人签收、代签等'
+                  placeholder='请输入签收情况说明，如本人签收、家属代签等'
                   value={signRemark}
                   onInput={(e) => setSignRemark(e.detail.value)}
                 />
@@ -696,7 +793,7 @@ const OrderDetailPage: React.FC = () => {
                 取消
               </View>
               <View className={styles.confirmBtn} onClick={handleCompleteDelivery}>
-                确认完成
+                {order.status === '已完成' ? '保存修改' : '确认完成'}
               </View>
             </View>
           </View>

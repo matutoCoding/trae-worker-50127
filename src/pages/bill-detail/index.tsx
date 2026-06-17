@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text } from '@tarojs/components';
+import { View, Text, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useAppStore } from '@/store';
 import { formatPrice } from '@/utils';
@@ -10,7 +10,14 @@ type TabType = 'all' | 'in' | 'out';
 
 const BillDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('all');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const billRecords = useAppStore(s => s.billRecords);
+  const orders = useAppStore(s => s.orders);
+
+  const getOrderByNo = (orderNo?: string) => {
+    if (!orderNo) return null;
+    return orders.find(o => o.orderNo === orderNo) || null;
+  };
 
   const summary = useMemo(() => {
     const income = billRecords.filter(b => b.type === '收入').reduce((s, b) => s + b.amount, 0);
@@ -18,7 +25,7 @@ const BillDetailPage: React.FC = () => {
     return { income, expense, net: income - expense };
   }, [billRecords]);
 
-  const groupedBills = useMemo(() => {
+  const filteredRecords = useMemo(() => {
     let records = billRecords;
     if (activeTab === 'in') {
       records = records.filter(b => b.type === '收入');
@@ -26,15 +33,42 @@ const BillDetailPage: React.FC = () => {
       records = records.filter(b => b.type === '支出');
     }
 
+    if (searchKeyword.trim()) {
+      const kw = searchKeyword.trim().toLowerCase();
+      records = records.filter(b => {
+        const order = getOrderByNo(b.orderNo);
+        return (
+          b.orderNo?.toLowerCase().includes(kw) ||
+          b.remark?.toLowerCase().includes(kw) ||
+          b.category.toLowerCase().includes(kw) ||
+          order?.customerName.toLowerCase().includes(kw)
+        );
+      });
+    }
+
+    return records;
+  }, [activeTab, billRecords, searchKeyword, orders]);
+
+  const groupedBills = useMemo(() => {
     const groups: Record<string, typeof billRecords> = {};
-    records.forEach(record => {
+    filteredRecords.forEach(record => {
       if (!groups[record.date]) {
         groups[record.date] = [];
       }
       groups[record.date].push(record);
     });
     return groups;
-  }, [activeTab, billRecords]);
+  }, [filteredRecords]);
+
+  const goToOrder = (orderNo?: string) => {
+    if (!orderNo) return;
+    const order = getOrderByNo(orderNo);
+    if (order) {
+      Taro.navigateTo({ url: `/pages/order-detail/index?id=${order.id}` });
+    } else {
+      Taro.showToast({ title: '找不到对应订单', icon: 'none' });
+    }
+  };
 
   const handleExport = () => {
     Taro.showToast({ title: '对账单导出中...', icon: 'loading' });
@@ -75,6 +109,19 @@ const BillDetailPage: React.FC = () => {
         </View>
       </View>
 
+      <View className={styles.searchBar}>
+        <Text className={styles.searchIcon}>🔍</Text>
+        <Input
+          className={styles.searchInput}
+          placeholder='搜索订单号、客户名、备注...'
+          value={searchKeyword}
+          onInput={(e) => setSearchKeyword(e.detail.value)}
+        />
+        {searchKeyword && (
+          <Text className={styles.clearSearch} onClick={() => setSearchKeyword('')}>✕</Text>
+        )}
+      </View>
+
       <View className={styles.tabs}>
         <View
           className={classnames(styles.tabItem, activeTab === 'all' && styles.tabActive)}
@@ -96,28 +143,47 @@ const BillDetailPage: React.FC = () => {
         </View>
       </View>
 
+      {searchKeyword && (
+        <View className={styles.searchInfo}>
+          <Text>搜索「{searchKeyword}」，找到 {filteredRecords.length} 条记录</Text>
+        </View>
+      )}
+
       <View className={styles.billList}>
         {Object.keys(groupedBills).length > 0 ? (
           Object.entries(groupedBills).map(([date, records]) => (
             <View key={date} className={styles.dateGroup}>
               <Text className={styles.dateHeader}>{date}</Text>
-              {records.map(bill => (
-                <View key={bill.id} className={styles.billItem}>
-                  <View className={styles.billInfo}>
-                    <View className={classnames(styles.typeIcon, bill.type === '收入' ? styles.iconIn : styles.iconOut)}>
-                      {bill.type === '收入' ? '📥' : '📤'}
+              {records.map(bill => {
+                const order = getOrderByNo(bill.orderNo);
+                return (
+                  <View
+                    key={bill.id}
+                    className={classnames(styles.billItem, bill.orderNo && styles.clickable)}
+                    onClick={() => goToOrder(bill.orderNo)}
+                  >
+                    <View className={styles.billInfo}>
+                      <View className={classnames(styles.typeIcon, bill.type === '收入' ? styles.iconIn : styles.iconOut)}>
+                        {bill.type === '收入' ? '📥' : '📤'}
+                      </View>
+                      <View className={styles.billDetail}>
+                        <Text className={styles.billCategory}>
+                          {bill.category}
+                          {order && <Text className={styles.billCustomer}> · {order.customerName}</Text>}
+                        </Text>
+                        {bill.remark && <Text className={styles.billRemark}>{bill.remark}</Text>}
+                        {bill.orderNo && <Text className={styles.billOrder}>订单：{bill.orderNo}</Text>}
+                      </View>
                     </View>
-                    <View className={styles.billDetail}>
-                      <Text className={styles.billCategory}>{bill.category}</Text>
-                      {bill.remark && <Text className={styles.billRemark}>{bill.remark}</Text>}
-                      {bill.orderNo && <Text className={styles.billOrder}>订单：{bill.orderNo}</Text>}
+                    <View className={styles.billRight}>
+                      <Text className={classnames(styles.billAmount, bill.type === '收入' ? styles.amountIn : styles.amountOut)}>
+                        {bill.type === '收入' ? '+' : '-'}{formatPrice(bill.amount)}
+                      </Text>
+                      {bill.orderNo && <Text className={styles.billGoDetail}>查看订单 ›</Text>}
                     </View>
                   </View>
-                  <Text className={classnames(styles.billAmount, bill.type === '收入' ? styles.amountIn : styles.amountOut)}>
-                    {bill.type === '收入' ? '+' : '-'}{formatPrice(bill.amount)}
-                  </Text>
-                </View>
-              ))}
+                );
+              })}
             </View>
           ))
         ) : (

@@ -62,9 +62,52 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+.searchBar {
+  margin: -$spacing-lg $page-padding $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  box-shadow: $shadow-float;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  position: relative;
+  z-index: 10;
+}
+
+.searchIcon {
+  font-size: 28rpx;
+  color: $color-text-tertiary;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  background: transparent;
+}
+
+.clearSearch {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+  background: $color-bg-hover;
+  border-radius: 50%;
+}
+
+.searchInfo {
+  padding: 0 $page-padding $spacing-sm;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
 .tabs {
   display: flex;
-  margin: -$spacing-lg $page-padding $spacing-md;
+  margin: 0 $page-padding $spacing-md;
   background: $color-bg-card;
   border-radius: $radius-lg;
   padding: $spacing-xs;
@@ -115,6 +158,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  &.clickable {
+    cursor: pointer;
+    transition: all $transition-base;
+
+    &:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+  }
 }
 
 .billInfo {
@@ -151,6 +204,12 @@
   color: $color-text-primary;
 }
 
+.billCustomer {
+  font-size: $font-size-sm;
+  color: $color-info;
+  font-weight: $font-weight-normal;
+}
+
 .billRemark {
   font-size: $font-size-xs;
   color: $color-text-tertiary;
@@ -162,14 +221,26 @@
   color: $color-info;
 }
 
+.billRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4rpx;
+}
+
 .billAmount {
   font-size: $font-size-lg;
   font-weight: $font-weight-bold;
-  margin-left: $spacing-md;
 }
 
 .amountIn { color: $color-success; }
 .amountOut { color: $color-error; }
+
+.billGoDetail {
+  font-size: 20rpx;
+  color: $color-secondary-dark;
+  font-weight: $font-weight-medium;
+}
 
 .bottomBar {
   position: fixed;

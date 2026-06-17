@@ -13,6 +13,7 @@ interface SavedFilter {
   selectedItemId: string | null;
   startDate: string;
   endDate: string;
+  searchKeyword: string;
 }
 
 const loadFilter = (): SavedFilter | null => {
@@ -64,12 +65,15 @@ const StockRecordsPage: React.FC = () => {
   );
   const [activeShortcut, setActiveShortcut] = useState<string>('');
   const [showItemModal, setShowItemModal] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState<string>(
+    fromInventoryDetail ? '' : (savedFilter?.searchKeyword || '')
+  );
+  const [showAllRecords, setShowAllRecords] = useState(false);
 
   useEffect(() => {
-    const filter: SavedFilter = { activeType, selectedItemId, startDate, endDate };
+    const filter: SavedFilter = { activeType, selectedItemId, startDate, endDate, searchKeyword };
     saveFilter(filter);
-  }, [activeType, selectedItemId, startDate, endDate]);
+  }, [activeType, selectedItemId, startDate, endDate, searchKeyword]);
 
   const selectedItem = useMemo(() =>
     inventoryItems.find(i => i.id === selectedItemId),
@@ -145,7 +149,29 @@ const StockRecordsPage: React.FC = () => {
     setEndDate('');
     setActiveShortcut('');
     setSearchKeyword('');
+    setShowAllRecords(false);
   };
+
+  const displayedRecords = useMemo(() => {
+    if (fromInventoryDetail && selectedItemId && !showAllRecords) {
+      return filteredRecords.slice(0, 5);
+    }
+    return filteredRecords;
+  }, [filteredRecords, fromInventoryDetail, selectedItemId, showAllRecords]);
+
+  const hasMore = fromInventoryDetail && selectedItemId && filteredRecords.length > 5 && !showAllRecords;
+
+  const displayedGroupedRecords = useMemo(() => {
+    const groups: Record<string, typeof displayedRecords> = {};
+    displayedRecords.forEach(record => {
+      const date = record.date.split(' ')[0];
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(record);
+    });
+    return groups;
+  }, [displayedRecords]);
 
   const applyShortcut = (days: number, label: string) => {
     const today = new Date();
@@ -179,13 +205,23 @@ const StockRecordsPage: React.FC = () => {
         </Text>
       </View>
 
-      {fromInventoryDetail && selectedItem && recentRecordsForItem.length > 0 && (
+      {fromInventoryDetail && selectedItem && filteredRecords.length > 0 && (
         <View className={styles.recentTip}>
           <Text className={styles.recentTipIcon}>📋</Text>
           <View className={styles.recentTipText}>
             <Text className={styles.recentTipTitle}>「{selectedItem.name}」最近登记记录</Text>
-            <Text>共 {stockRecords.filter(r => r.itemId === selectedItemId).length} 条记录，显示最近 {recentRecordsForItem.length} 条</Text>
+            <Text>共 {filteredRecords.length} 条记录{!showAllRecords && filteredRecords.length > 5 ? `，默认显示最近 5 条` : ''}</Text>
           </View>
+          {hasMore && (
+            <View className={styles.expandBtn} onClick={() => setShowAllRecords(true)}>
+              展开全部 ↓
+            </View>
+          )}
+          {showAllRecords && filteredRecords.length > 5 && (
+            <View className={styles.expandBtn} onClick={() => setShowAllRecords(false)}>
+              收起 ↑
+            </View>
+          )}
         </View>
       )}
 
@@ -306,8 +342,8 @@ const StockRecordsPage: React.FC = () => {
       </View>
 
       <View className={styles.recordList}>
-        {Object.keys(groupedRecords).length > 0 ? (
-          Object.entries(groupedRecords).map(([date, records]) => (
+        {Object.keys(displayedGroupedRecords).length > 0 ? (
+          Object.entries(displayedGroupedRecords).map(([date, records]) => (
             <View key={date} className={styles.dateGroup}>
               <Text className={styles.dateHeader}>
                 {date}

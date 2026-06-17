@@ -639,3 +639,26 @@
   color: $color-error;
   font-weight: $font-weight-semibold;
 }
+
+.orderTypeTag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background: rgba(74, 55, 40, 0.08);
+  color: $color-primary-dark;
+  font-size: 20rpx;
+  border-radius: $radius-sm;
+  margin-left: $spacing-sm;
+  font-weight: $font-weight-medium;
+}
+
+.priceVerify {
+  margin-top: $spacing-sm;
+  padding-top: $spacing-sm;
+  border-top: 1rpx dashed $color-divider;
+}
+
+.priceVerifyText {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  font-family: monospace;
+}

@@ -4,6 +4,7 @@ export const orders: Order[] = [
   {
     id: 'o001',
     orderNo: 'FS202606170001',
+    orderType: '定制',
     customerName: '张先生',
     customerPhone: '138****8888',
     address: '北京市朝阳区某某街道某某小区3号楼',
@@ -12,18 +13,25 @@ export const orders: Order[] = [
       { productId: 'p001', productName: '福寿双全男款寿衣套装', price: 2880, quantity: 1, size: 'XL', material: '真丝织锦' },
       { productId: 'p008', productName: '铺金盖银寿褥套装', price: 880, quantity: 1, size: '标准' }
     ],
-    totalAmount: 3760,
-    paidAmount: 3760,
+    totalAmount: 4560,
+    paidAmount: 4560,
     status: '配送中',
     isUrgent: true,
+    urgentFee: 300,
+    materialPrice: 380,
+    customServiceFee: 500,
+    deliveryFee: 0,
     createTime: '2026-06-17 08:30:00',
     deliveryTime: '2026-06-17 14:00:00',
     remark: '急单，请尽快配送至八宝山殡仪馆',
-    taboos: '忌用缎子面料，不用纽扣'
+    taboos: '忌用缎子面料，不用纽扣',
+    sizeInfo: { gender: '男', height: 175, weight: 70, shoulder: 44, chest: 100, waist: 90, hip: 100, sleeve: 60, pants: 100, shoeSize: 42 },
+    materialNames: ['真丝织锦', '棉质衬里']
   },
   {
     id: 'o002',
     orderNo: 'FS202606170002',
+    orderType: '定制',
     customerName: '李女士',
     customerPhone: '139****6666',
     address: '北京市海淀区某某路某某号',
@@ -33,27 +41,38 @@ export const orders: Order[] = [
       { productId: 'p007', productName: '五福捧寿寿被', price: 480, quantity: 1, size: '加大' },
       { productId: 'p009', productName: '寿帽寿鞋全套配饰', price: 360, quantity: 1, size: '38' }
     ],
-    totalAmount: 3520,
+    totalAmount: 4370,
     paidAmount: 2000,
     status: '定制中',
     isUrgent: false,
+    urgentFee: 0,
+    materialPrice: 350,
+    customServiceFee: 500,
+    deliveryFee: 0,
     createTime: '2026-06-16 16:20:00',
     remark: '身高160cm，体重55kg，需要量身微调',
-    taboos: '忌黑色，偏好蓝色系'
+    taboos: '忌黑色，偏好蓝色系',
+    sizeInfo: { gender: '女', height: 160, weight: 55, shoulder: 38, chest: 90, waist: 80, hip: 92, sleeve: 55, pants: 95, shoeSize: 38 },
+    materialNames: ['真丝缎面', '丝绸内衬']
   },
   {
     id: 'o003',
     orderNo: 'FS202606160005',
+    orderType: '定制',
     customerName: '王先生',
     customerPhone: '136****5555',
     address: '北京市丰台区某某街道',
     items: [
       { productId: 'p003', productName: '金丝楠木寿材', price: 18800, quantity: 1, size: '标准', material: '金丝楠木' }
     ],
-    totalAmount: 18800,
-    paidAmount: 18800,
+    totalAmount: 19900,
+    paidAmount: 19900,
     status: '待配送',
     isUrgent: true,
+    urgentFee: 300,
+    materialPrice: 0,
+    customServiceFee: 500,
+    deliveryFee: 0,
     createTime: '2026-06-16 10:15:00',
     deliveryTime: '2026-06-18 09:00:00',
     remark: '18号上午9点前必须送达'
@@ -61,6 +80,7 @@ export const orders: Order[] = [
   {
     id: 'o004',
     orderNo: 'FS202606150012',
+    orderType: '销售',
     customerName: '赵女士',
     customerPhone: '137****2222',
     address: '北京市西城区某某胡同',
@@ -72,12 +92,17 @@ export const orders: Order[] = [
     paidAmount: 5560,
     status: '已完成',
     isUrgent: false,
+    urgentFee: 0,
+    deliveryFee: 80,
     createTime: '2026-06-15 14:30:00',
-    deliveryTime: '2026-06-16 10:00:00'
+    deliveryTime: '2026-06-16 10:00:00',
+    deliverCompleteTime: '2026-06-16 10:30:00',
+    signRemark: '家属签收'
   },
   {
     id: 'o005',
     orderNo: 'FS202606140008',
+    orderType: '定制',
     customerName: '孙先生',
     customerPhone: '135****1111',
     address: '北京市东城区某某大街',
@@ -85,17 +110,28 @@ export const orders: Order[] = [
       { productId: 'p004', productName: '柏木福寿寿材', price: 8800, quantity: 1, size: '加大' },
       { productId: 'p005', productName: '云锦唐装寿衣', price: 1280, quantity: 1, size: 'XXL' }
     ],
-    totalAmount: 10080,
+    totalAmount: 10580,
     paidAmount: 5000,
     status: '退换中',
     isUrgent: false,
+    urgentFee: 0,
+    materialPrice: 0,
+    customServiceFee: 500,
+    deliveryFee: 0,
     createTime: '2026-06-14 11:20:00',
     remark: '尺寸偏大，需要换货',
-    taboos: ''
+    taboos: '',
+    returnInfo: {
+      type: '换货',
+      reason: '尺寸偏大，需要换货',
+      handleTime: undefined,
+      refundAmount: undefined
+    }
   },
   {
     id: 'o006',
     orderNo: 'FS202606130020',
+    orderType: '销售',
     customerName: '周女士',
     customerPhone: '133****7777',
     address: '北京市通州区某某镇',
@@ -106,6 +142,8 @@ export const orders: Order[] = [
     paidAmount: 680,
     status: '已取消',
     isUrgent: false,
+    urgentFee: 0,
+    deliveryFee: 0,
     createTime: '2026-06-13 09:45:00',
     remark: '客户主动取消'
   }
