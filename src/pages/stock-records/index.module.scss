@@ -1,0 +1,352 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary-dark 0%, $color-primary 100%);
+  padding: $spacing-xl $page-padding;
+  color: $color-text-white;
+}
+
+.headerTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
+}
+
+.headerDesc {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+}
+
+.filterBar {
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.typeTabs {
+  display: flex;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: 4rpx;
+}
+
+.typeTab {
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.activeIn {
+    background: rgba(61, 122, 61, 0.15);
+    color: #3D7A3D;
+    font-weight: $font-weight-semibold;
+  }
+
+  &.activeOut {
+    background: rgba(163, 61, 61, 0.15);
+    color: #A33D3D;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.itemSelect {
+  flex: 1;
+  min-width: 0;
+}
+
+.selectBtn {
+  height: 64rpx;
+  padding: 0 $spacing-md;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  background: $color-bg-page;
+
+  .placeholder {
+    color: $color-text-tertiary;
+  }
+}
+
+.statRow {
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-md $page-padding;
+}
+
+.statCard {
+  flex: 1;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  text-align: center;
+  box-shadow: $shadow-card;
+}
+
+.statNum {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+
+  &.in { color: $color-success; }
+  &.out { color: $color-error; }
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.recordList {
+  padding: 0 $page-padding $page-padding;
+}
+
+.dateGroup {
+  margin-bottom: $spacing-lg;
+}
+
+.dateHeader {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-sm;
+  padding-left: $spacing-xs;
+}
+
+.recordItem {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-sm;
+  box-shadow: $shadow-card;
+}
+
+.recordHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.recordInfo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  min-width: 0;
+}
+
+.typeBadge {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  flex-shrink: 0;
+
+  &.in {
+    background: rgba(61, 122, 61, 0.1);
+  }
+
+  &.out {
+    background: rgba(163, 61, 61, 0.1);
+  }
+}
+
+.recordDetail {
+  flex: 1;
+  min-width: 0;
+}
+
+.recordItemName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+  @include text-ellipsis;
+}
+
+.recordMeta {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.recordQuantity {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+
+  &.in { color: $color-success; }
+  &.out { color: $color-error; }
+}
+
+.recordFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.recordOperator {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.recordTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.recordRemark {
+  margin-top: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.empty {
+  padding: 100rpx 0;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 64rpx;
+  margin-bottom: $spacing-md;
+  opacity: 0.3;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+}
+
+.modalContent {
+  width: 100%;
+  max-height: 70vh;
+  background: $color-bg-card;
+  border-radius: $radius-lg $radius-lg 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.modalClose {
+  font-size: 36rpx;
+  color: $color-text-tertiary;
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-md;
+}
+
+.itemOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+  transition: all $transition-base;
+
+  &.active {
+    background: rgba(74, 55, 40, 0.08);
+  }
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.itemOptionInfo {
+  flex: 1;
+}
+
+.itemOptionName {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: 4rpx;
+}
+
+.itemOptionStock {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.itemCheck {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: transparent;
+  flex-shrink: 0;
+
+  .active & {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    border-color: $color-primary;
+    color: $color-text-white;
+  }
+}
+
+.clearBtn {
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  background: $color-bg-page;
+  border-radius: $radius-sm;
+  margin-right: $spacing-sm;
+}

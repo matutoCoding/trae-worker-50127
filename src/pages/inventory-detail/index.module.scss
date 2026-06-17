@@ -10,16 +10,38 @@
   padding: $spacing-xl $page-padding;
 }
 
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-sm;
+}
+
 .title {
   font-size: $font-size-xl;
   font-weight: $font-weight-bold;
   color: $color-text-white;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $spacing-xs;
 }
 
 .desc {
   font-size: $font-size-sm;
   color: rgba(255, 255, 255, 0.8);
+}
+
+.recordsBtn {
+  padding: $spacing-sm $spacing-md;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10rpx);
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.3);
+  }
 }
 
 .filterBar {
@@ -85,6 +107,25 @@
   padding: $spacing-lg;
   margin-bottom: $spacing-md;
   box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.9;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.viewRecordsHint {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: $font-size-xs;
+  color: $color-info;
+  margin-top: $spacing-sm;
 }
 
 .itemHeader {

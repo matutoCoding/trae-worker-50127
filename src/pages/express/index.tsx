@@ -1,14 +1,21 @@
-import React, { useMemo } from 'react';
-import { View, Text } from '@tarojs/components';
+import React, { useMemo, useState } from 'react';
+import { View, Text, Input, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useAppStore } from '@/store';
 import { formatPrice, formatDateTime } from '@/utils';
+import { Order } from '@/types';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 
 const ExpressPage: React.FC = () => {
   const orders = useAppStore(state => state.orders);
   const startDelivery = useAppStore(state => state.startDelivery);
+  const completeDelivery = useAppStore(state => state.completeDelivery);
+
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
+  const [signRemark, setSignRemark] = useState('');
+  const [deliveryFee, setDeliveryFee] = useState('');
 
   const urgentOrders = useMemo(() => {
     return orders.filter(o => o.isUrgent && ['待配送', '配送中', '定制中'].includes(o.status));
@@ -29,6 +36,25 @@ const ExpressPage: React.FC = () => {
         }
       }
     });
+  };
+
+  const handleOpenComplete = (order: Order) => {
+    setCurrentOrder(order);
+    setSignRemark('');
+    setDeliveryFee('0');
+    setShowCompleteModal(true);
+  };
+
+  const handleCompleteDelivery = () => {
+    if (!currentOrder) return;
+    const fee = parseFloat(deliveryFee) || 0;
+    completeDelivery({
+      orderId: currentOrder.id,
+      signRemark: signRemark.trim() || undefined,
+      deliveryFee: fee
+    });
+    setShowCompleteModal(false);
+    Taro.showToast({ title: '配送已完成', icon: 'success' });
   };
 
   const handleNavigate = (address: string) => {
@@ -138,8 +164,15 @@ const ExpressPage: React.FC = () => {
                   📍 导航
                 </View>
                 {order.status === '配送中' ? (
+                  <View
+                    className={classnames(styles.actionBtn, styles.completeBtn)}
+                    onClick={() => handleOpenComplete(order)}
+                  >
+                    配送完成
+                  </View>
+                ) : order.status === '定制中' ? (
                   <View className={classnames(styles.actionBtn, styles.deliveredBtn)}>
-                    配送中...
+                    定制中
                   </View>
                 ) : (
                   <View
@@ -159,6 +192,46 @@ const ExpressPage: React.FC = () => {
           </View>
         )}
       </View>
+
+      {showCompleteModal && currentOrder && (
+        <View className={styles.modalMask}>
+          <View className={styles.modalContent}>
+            <View className={styles.modalHeader}>
+              <Text className={styles.modalTitle}>配送完成 - {currentOrder.orderNo}</Text>
+              <Text className={styles.modalClose} onClick={() => setShowCompleteModal(false)}>✕</Text>
+            </View>
+            <View className={styles.modalBody}>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>签收备注</Text>
+                <Textarea
+                  className={styles.formTextarea}
+                  placeholder='请输入签收情况说明，如本人签收、家属代签等'
+                  value={signRemark}
+                  onInput={(e) => setSignRemark(e.detail.value)}
+                />
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>配送服务费（元）</Text>
+                <Input
+                  className={styles.formInput}
+                  type='digit'
+                  placeholder='请输入配送服务费，没有则填0'
+                  value={deliveryFee}
+                  onInput={(e) => setDeliveryFee(e.detail.value)}
+                />
+              </View>
+            </View>
+            <View className={styles.modalFooter}>
+              <View className={styles.cancelBtn} onClick={() => setShowCompleteModal(false)}>
+                取消
+              </View>
+              <View className={styles.confirmBtn} onClick={handleCompleteDelivery}>
+                确认完成
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

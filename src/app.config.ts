@@ -7,7 +7,9 @@ export default defineAppConfig({
     'pages/style-detail/index',
     'pages/express/index',
     'pages/inventory-detail/index',
-    'pages/bill-detail/index'
+    'pages/bill-detail/index',
+    'pages/order-detail/index',
+    'pages/stock-records/index'
   ],
   window: {
     backgroundTextStyle: 'light',

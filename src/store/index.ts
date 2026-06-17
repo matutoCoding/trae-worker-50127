@@ -89,16 +89,23 @@ interface AppState {
     address: string;
     funeralHome?: string;
     isUrgent?: boolean;
+    urgentFee?: number;
     remark?: string;
     taboos?: string;
     customItems: CustomItem[];
     sizeInfo: Partial<SizeRecord>;
     materialNames: string[];
     materialPrice: number;
+    suitName?: string;
   }) => Order;
 
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
   startDelivery: (orderId: string) => void;
+  completeDelivery: (params: {
+    orderId: string;
+    signRemark?: string;
+    deliveryFee?: number;
+  }) => void;
 
   handleReturn: (params: {
     orderId: string;
@@ -204,7 +211,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   submitCustomOrder: (params) => {
-    const { customerName, customerPhone, address, funeralHome, isUrgent = false, remark, taboos, customItems, sizeInfo, materialNames, materialPrice } = params;
+    const { customerName, customerPhone, address, funeralHome, isUrgent = false, urgentFee = 0, remark, taboos, customItems, sizeInfo, materialNames, materialPrice, suitName } = params;
     const now = new Date();
 
     const items = customItems.map(ci => ({
@@ -218,7 +225,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     const itemsTotal = customItems.reduce((sum, ci) => sum + ci.price * ci.quantity, 0);
     const customServiceFee = 500;
-    const totalAmount = itemsTotal + materialPrice + customServiceFee;
+    const totalAmount = itemsTotal + materialPrice + customServiceFee + urgentFee;
 
     const newOrder: Order = {
       id: generateId('o'),
@@ -232,11 +239,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       paidAmount: 0,
       status: '待确认',
       isUrgent,
+      urgentFee,
       createTime: formatDateTime(now),
       remark,
       taboos,
       sizeInfo,
-      materialNames
+      materialNames,
+      suitName
     };
 
     set({ orders: [newOrder, ...get().orders] });
@@ -248,7 +257,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       category: isUrgent ? '定制加急' : '定制服务',
       amount: totalAmount,
       orderNo: newOrder.orderNo,
-      remark: `定制服务费${customServiceFee}元，含${customItems.length}件商品${materialNames.length ? '，材质：' + materialNames.join('/') : ''}`
+      remark: `定制服务费${customServiceFee}元${urgentFee > 0 ? `，加急费${urgentFee}元` : ''}，含${customItems.length}件商品${materialNames.length ? '，材质：' + materialNames.join('/') : ''}${suitName ? '，套装：' + suitName : ''}`
     };
     set({ billRecords: [bill, ...get().billRecords] });
 
@@ -277,6 +286,41 @@ export const useAppStore = create<AppState>((set, get) => ({
           : o
       )
     });
+    get().persist();
+  },
+
+  completeDelivery: ({ orderId, signRemark, deliveryFee = 0 }) => {
+    const order = get().orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const now = new Date();
+    set({
+      orders: get().orders.map(o =>
+        o.id === orderId
+          ? {
+              ...o,
+              status: '已完成' as const,
+              deliverCompleteTime: formatDateTime(now),
+              signRemark,
+              deliveryFee
+            }
+          : o
+      )
+    });
+
+    if (deliveryFee > 0) {
+      const deliveryBill: BillRecord = {
+        id: generateId('b'),
+        date: formatDate(now),
+        type: '收入',
+        category: '配送服务',
+        amount: deliveryFee,
+        orderNo: order.orderNo,
+        remark: `配送服务费${signRemark ? ' - ' + signRemark : ''}`
+      };
+      set({ billRecords: [deliveryBill, ...get().billRecords] });
+    }
+
     get().persist();
   },
 

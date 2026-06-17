@@ -48,11 +48,25 @@ const InventoryDetailPage: React.FC = () => {
     }
   };
 
+  const goStockRecords = (itemId?: string) => {
+    const url = itemId
+      ? `/pages/stock-records/index?itemId=${itemId}`
+      : '/pages/stock-records/index';
+    Taro.navigateTo({ url });
+  };
+
   return (
     <View className={styles.page}>
       <View className={styles.header}>
-        <Text className={styles.title}>库存管理</Text>
-        <Text className={styles.desc}>实时监控库存状态，及时补货避免缺货</Text>
+        <View className={styles.headerTop}>
+          <View>
+            <Text className={styles.title}>库存管理</Text>
+            <Text className={styles.desc}>实时监控库存状态，及时补货避免缺货</Text>
+          </View>
+          <View className={styles.recordsBtn} onClick={() => goStockRecords()}>
+            📋 出入库记录
+          </View>
+        </View>
       </View>
 
       <View className={styles.filterBar}>
@@ -82,7 +96,11 @@ const InventoryDetailPage: React.FC = () => {
       <View className={styles.list}>
         {filteredItems.length > 0 ? (
           filteredItems.map(item => (
-            <View key={item.id} className={styles.item}>
+            <View
+              key={item.id}
+              className={classnames(styles.item, styles.clickable)}
+              onClick={() => goStockRecords(item.id)}
+            >
               <View className={styles.itemHeader}>
                 <View className={styles.itemInfo}>
                   <Text className={styles.itemName}>{item.name}</Text>
@@ -113,6 +131,11 @@ const InventoryDetailPage: React.FC = () => {
               <View className={styles.itemFooter}>
                 <Text className={styles.location}>📍 {item.location}</Text>
                 <Text className={styles.updateTime}>更新于 {item.lastUpdate}</Text>
+              </View>
+
+              <View className={styles.viewRecordsHint}>
+                <Text>📋</Text>
+                <Text>点击查看出入库记录 →</Text>
               </View>
             </View>
           ))

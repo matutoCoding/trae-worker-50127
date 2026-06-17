@@ -50,12 +50,17 @@ export interface Order {
   paidAmount: number;
   status: '待确认' | '定制中' | '待配送' | '配送中' | '已完成' | '已取消' | '退换中';
   isUrgent: boolean;
+  urgentFee?: number;
+  deliveryFee?: number;
   createTime: string;
   deliveryTime?: string;
+  deliverCompleteTime?: string;
+  signRemark?: string;
   remark?: string;
   taboos?: string;
   sizeInfo?: Partial<SizeRecord>;
   materialNames?: string[];
+  suitName?: string;
   returnInfo?: {
     type: '退货' | '换货' | null;
     reason: string;

@@ -93,6 +93,7 @@ const CustomPage: React.FC = () => {
             address: address.trim(),
             funeralHome: funeralHome.trim() || undefined,
             isUrgent,
+            urgentFee,
             remark: remark.trim() || undefined,
             taboos: taboos.trim() || undefined,
             customItems: customList,
