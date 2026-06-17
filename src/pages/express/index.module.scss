@@ -395,3 +395,116 @@
   align-items: center;
   justify-content: center;
 }
+
+.tabsBar {
+  display: flex;
+  padding: $spacing-xs;
+  background: $color-bg-page;
+  margin: 0 $page-padding $spacing-md;
+  border-radius: $radius-md;
+}
+
+.tabItem {
+  flex: 1;
+  height: 68rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+}
+
+.tabActive {
+  background: $color-bg-card;
+  color: $color-error;
+  font-weight: $font-weight-bold;
+  box-shadow: $shadow-card;
+}
+
+.completedCard {
+  border-left-color: $color-success;
+
+  .urgentBadge {
+    background: linear-gradient(135deg, #3D7A3D 0%, #5BA05B 100%);
+  }
+
+  .orderStatus {
+    background: rgba(61, 122, 61, 0.1);
+    color: $color-success;
+  }
+}
+
+.completeInfo {
+  background: rgba(61, 122, 61, 0.06);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  border: 1rpx solid rgba(61, 122, 61, 0.15);
+}
+
+.completeInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xs 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+    padding-bottom: $spacing-sm;
+    margin-bottom: $spacing-sm;
+  }
+}
+
+.completeInfoLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.completeInfoValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.deliveryFeeHighlight {
+  color: $color-info;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-md;
+}
+
+.viewDetailBtn {
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.orderAmountRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-sm;
+  margin-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.orderAmountLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.orderAmountValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-error;
+}
+
+.clickableCard {
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.9;
+  }
+}

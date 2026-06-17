@@ -240,6 +240,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       status: '待确认',
       isUrgent,
       urgentFee,
+      materialPrice,
+      customServiceFee,
       createTime: formatDateTime(now),
       remark,
       taboos,

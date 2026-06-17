@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from '@tarojs/components';
 import { Order } from '@/types';
-import { formatPrice, formatDate, getStatusColor, getStatusBgColor } from '@/utils';
+import { formatPrice, formatDate, formatDateTime, getStatusColor, getStatusBgColor } from '@/utils';
 import styles from './index.module.scss';
 
 interface OrderCardProps {
@@ -10,6 +10,9 @@ interface OrderCardProps {
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, onClick }) => {
+  const finalAmount = order.totalAmount + (order.deliveryFee || 0);
+  const isCompleted = order.status === '已完成';
+
   return (
     <View className={styles.card} onClick={onClick}>
       <View className={styles.header}>
@@ -64,11 +67,47 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onClick }) => {
         </View>
       )}
 
+      {isCompleted && (
+        <View className={styles.completeInfo}>
+          {order.deliverCompleteTime && (
+            <View className={styles.completeInfoRow}>
+              <Text className={styles.completeInfoLabel}>完成时间</Text>
+              <Text className={styles.completeInfoValue}>{order.deliverCompleteTime}</Text>
+            </View>
+          )}
+          {order.deliveryFee && order.deliveryFee > 0 && (
+            <View className={styles.completeInfoRow}>
+              <Text className={styles.completeInfoLabel}>配送服务费</Text>
+              <Text className={styles.completeInfoValue} style={{ color: '#4A6B8A', fontWeight: 600 }}>
+                +{formatPrice(order.deliveryFee)}
+              </Text>
+            </View>
+          )}
+          {order.signRemark && (
+            <View className={styles.completeInfoRow}>
+              <Text className={styles.completeInfoLabel}>签收备注</Text>
+              <Text className={styles.completeInfoValue}>{order.signRemark}</Text>
+            </View>
+          )}
+        </View>
+      )}
+
       <View className={styles.footer}>
-        <Text className={styles.time}>{formatDate(order.createTime)}</Text>
+        <Text className={styles.time}>
+          {isCompleted && order.deliverCompleteTime
+            ? `完成：${formatDate(order.deliverCompleteTime)}`
+            : `下单：${formatDate(order.createTime)}`
+          }
+        </Text>
         <View className={styles.totalWrap}>
-          <Text className={styles.totalLabel}>合计</Text>
-          <Text className={styles.total}>{formatPrice(order.totalAmount)}</Text>
+          <Text className={styles.totalLabel}>
+            {isCompleted ? '总计' : '合计'}
+            {order.isUrgent && <Text className={styles.amountTag}>含加急费</Text>}
+            {isCompleted && order.deliveryFee && order.deliveryFee > 0 && (
+              <Text className={styles.amountTagDelivery}>含配送费</Text>
+            )}
+          </Text>
+          <Text className={styles.total}>{formatPrice(finalAmount)}</Text>
         </View>
       </View>
     </View>

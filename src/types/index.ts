@@ -52,6 +52,8 @@ export interface Order {
   isUrgent: boolean;
   urgentFee?: number;
   deliveryFee?: number;
+  materialPrice?: number;
+  customServiceFee?: number;
   createTime: string;
   deliveryTime?: string;
   deliverCompleteTime?: string;

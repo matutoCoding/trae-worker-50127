@@ -228,7 +228,79 @@ const OrderDetailPage: React.FC = () => {
     shoeSize: '码'
   };
 
+  const statusConfig = {
+    '待确认': {
+      text: '等待门店确认订单',
+      hint: '请核对尺寸、材质、套装等信息，确认后将进入定制流程',
+      nextTitle: '下一步：确认订单信息',
+      nextDesc: '检查客户信息、商品明细、尺寸材质无误后，点击"确认订单"开始定制。如有问题可取消订单。',
+      nextIcon: '✅'
+    },
+    '定制中': {
+      text: '正在为您定制中',
+      hint: '工厂正在按定制要求加紧制作，请耐心等待',
+      nextTitle: '下一步：标记定制完成',
+      nextDesc: '商品制作完成并质检通过后，标记为待配送，准备安排物流。',
+      nextIcon: '🏭'
+    },
+    '待配送': {
+      text: '定制完成，等待配送',
+      hint: '商品已完成制作，可安排配送至客户指定地点',
+      nextTitle: '下一步：安排配送',
+      nextDesc: '确认配送地址和联系人信息后，点击"开始配送"，进入配送流程。',
+      nextIcon: '🚚'
+    },
+    '配送中': {
+      text: '订单正在配送途中',
+      hint: '配送员正在前往指定地址，请保持电话畅通',
+      nextTitle: '下一步：确认配送完成',
+      nextDesc: '客户签收后，填写送达时间和签收备注，如有配送服务费一并录入。',
+      nextIcon: '✅'
+    },
+    '已完成': {
+      text: '订单已完成，感谢您的信任',
+      hint: '',
+      nextTitle: '',
+      nextDesc: '',
+      nextIcon: ''
+    },
+    '已取消': {
+      text: '订单已取消',
+      hint: '',
+      nextTitle: '',
+      nextDesc: '',
+      nextIcon: ''
+    },
+    '退换中': {
+      text: '退换处理中',
+      hint: '正在处理客户的退换申请',
+      nextTitle: '下一步：完成退换处理',
+      nextDesc: '根据退换类型完成相应操作后，点击"处理完成"更新订单状态。',
+      nextIcon: '🔄'
+    }
+  } as const;
+
+  const currentStatus = order.status as keyof typeof statusConfig;
+  const statusInfo = statusConfig[currentStatus];
+
   const actions = getStatusActions(order);
+
+  const itemsTotal = useMemo(() =>
+    order.items.reduce((s, i) => s + i.price * i.quantity, 0),
+    [order.items]
+  );
+
+  const materialFee = order.materialPrice ?? 0;
+  const customFee = order.customServiceFee ?? 500;
+  const urgentFee = order.urgentFee ?? 0;
+  const deliveryFeeActual = order.deliveryFee ?? 0;
+  const finalTotal = order.totalAmount + deliveryFeeActual;
+
+  const orderBillSummary = useMemo(() => {
+    const totalIn = orderBills.filter(b => b.type === '收入').reduce((s, b) => s + b.amount, 0);
+    const totalOut = orderBills.filter(b => b.type === '支出').reduce((s, b) => s + b.amount, 0);
+    return { totalIn, totalOut };
+  }, [orderBills]);
 
   return (
     <View className={styles.page}>
@@ -237,17 +309,25 @@ const OrderDetailPage: React.FC = () => {
           <Text className={styles.statusBadge}>{order.status}</Text>
           {order.isUrgent && <Text className={styles.urgentTag}>急单</Text>}
         </View>
-        <Text className={styles.statusText}>
-          {order.status === '待确认' && '等待门店确认订单'}
-          {order.status === '定制中' && '正在为您定制中'}
-          {order.status === '待配送' && '定制完成，等待配送'}
-          {order.status === '配送中' && '订单正在配送途中'}
-          {order.status === '已完成' && '订单已完成，感谢您的信任'}
-          {order.status === '已取消' && '订单已取消'}
-          {order.status === '退换中' && '退换处理中'}
-        </Text>
+        <Text className={styles.statusText}>{statusInfo.text}</Text>
+        {statusInfo.hint && <Text className={styles.statusHintText}>💡 {statusInfo.hint}</Text>}
         <Text className={styles.orderNo}>订单号：{order.orderNo}</Text>
       </View>
+
+      {statusInfo.nextTitle && (
+        <View className={styles.nextActionCard}>
+          <View className={styles.nextActionHeader}>
+            <Text className={styles.nextActionIcon}>{statusInfo.nextIcon}</Text>
+            <Text className={styles.nextActionTitle}>{statusInfo.nextTitle}</Text>
+          </View>
+          <Text className={styles.nextActionDesc}>{statusInfo.nextDesc}</Text>
+          {actions.length > 0 && actions.length === 1 && order.status !== '退换中' && (
+            <View className={styles.nextActionBtn} onClick={actions[0].action}>
+              👉 立即{actions[0].label}
+            </View>
+          )}
+        </View>
+      )}
 
       <View className={styles.timeline}>
         {timeline.map((item, idx) => (
@@ -434,39 +514,47 @@ const OrderDetailPage: React.FC = () => {
             </Text>
             <View className={styles.priceRow}>
               <Text className={styles.priceLabel}>商品小计</Text>
-              <Text className={styles.priceValue}>
-                {formatPrice(order.items.reduce((s, i) => s + i.price * i.quantity, 0))}
-              </Text>
+              <Text className={styles.priceValue}>{formatPrice(itemsTotal)}</Text>
             </View>
             {order.materialNames && order.materialNames.length > 0 && (
               <View className={styles.priceRow}>
                 <Text className={styles.priceLabel}>材质费用（{order.materialNames.length}种）</Text>
-                <Text className={styles.priceValue}>
-                  {formatPrice(order.totalAmount - order.items.reduce((s, i) => s + i.price * i.quantity, 0) - 500 - (order.urgentFee || 0) - (order.deliveryFee || 0))}
-                </Text>
+                <Text className={styles.priceValue}>{formatPrice(materialFee)}</Text>
               </View>
             )}
             <View className={styles.priceRow}>
               <Text className={styles.priceLabel}>定制服务费</Text>
-              <Text className={styles.priceValue}>{formatPrice(500)}</Text>
+              <Text className={styles.priceValue}>{formatPrice(customFee)}</Text>
             </View>
-            {order.urgentFee && order.urgentFee > 0 && (
+            {urgentFee > 0 && (
               <View className={styles.priceRow}>
-                <Text className={styles.priceLabel}>加急费用</Text>
-                <Text className={styles.priceValue} style={{ color: '#A33D3D' }}>
-                  {formatPrice(order.urgentFee)}
+                <Text className={styles.priceLabel}>
+                  加急费用
+                  <Text className={classnames(styles.feeTag, styles.feeTagUrgent)}>急单</Text>
+                </Text>
+                <Text className={styles.priceValue} style={{ color: '#A33D3D', fontWeight: 600 }}>
+                  +{formatPrice(urgentFee)}
                 </Text>
               </View>
             )}
-            {order.deliveryFee && order.deliveryFee > 0 && (
+            {deliveryFeeActual > 0 && (
               <View className={styles.priceRow}>
-                <Text className={styles.priceLabel}>配送费用</Text>
-                <Text className={styles.priceValue}>{formatPrice(order.deliveryFee)}</Text>
+                <Text className={styles.priceLabel}>
+                  配送费用
+                  <Text className={classnames(styles.feeTag, styles.feeTagDelivery)}>配送</Text>
+                </Text>
+                <Text className={styles.priceValue} style={{ color: '#4A6B8A', fontWeight: 600 }}>
+                  +{formatPrice(deliveryFeeActual)}
+                </Text>
               </View>
             )}
             <View className={styles.priceTotal}>
-              <Text className={styles.priceLabel}>订单总金额</Text>
-              <Text className={styles.priceValue}>{formatPrice(order.totalAmount + (order.deliveryFee || 0))}</Text>
+              <Text className={styles.priceLabel}>
+                订单总金额
+                {order.isUrgent && <Text className={classnames(styles.feeTag, styles.feeTagUrgent)}>含加急费</Text>}
+                {deliveryFeeActual > 0 && <Text className={classnames(styles.feeTag, styles.feeTagDelivery)}>含配送费</Text>}
+              </Text>
+              <Text className={styles.priceValue}>{formatPrice(finalTotal)}</Text>
             </View>
           </View>
         </>
@@ -474,12 +562,28 @@ const OrderDetailPage: React.FC = () => {
 
       {activeTab === 'bills' && (
         <View className={styles.section}>
+          <View className={styles.billSectionHeader}>
+            <Text className={styles.sectionTitle} style={{ marginBottom: 0 }}>
+              <Text className={styles.sectionIcon}>📝</Text>
+              对账记录
+            </Text>
+            <View className={styles.billSummary}>
+              <Text>收入 </Text>
+              <Text className={styles.billSummaryIn}>+{formatPrice(orderBillSummary.totalIn)}</Text>
+              {orderBillSummary.totalOut > 0 && (
+                <>
+                  <Text>　支出 </Text>
+                  <Text className={styles.billSummaryOut}>-{formatPrice(orderBillSummary.totalOut)}</Text>
+                </>
+              )}
+            </View>
+          </View>
           {orderBills.length > 0 ? (
             orderBills.map(bill => (
               <View key={bill.id} className={styles.billItem}>
                 <View className={styles.billInfo}>
                   <Text className={styles.billCategory}>{bill.category}</Text>
-                  {bill.remark && <Text className={styles.billRemark}>{bill.remark}</Text>}
+                  <Text className={styles.billRemark}>{bill.date}{bill.remark ? ' · ' + bill.remark : ''}</Text>
                 </View>
                 <Text className={classnames(styles.billAmount, bill.type === '收入' ? 'in' : 'out')}>
                   {bill.type === '收入' ? '+' : '-'}{formatPrice(bill.amount)}

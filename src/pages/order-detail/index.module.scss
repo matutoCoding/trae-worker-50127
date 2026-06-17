@@ -543,3 +543,99 @@
   font-size: $font-size-xs;
   color: $color-text-secondary;
 }
+
+.nextActionCard {
+  margin: $spacing-md $page-padding $spacing-lg;
+  padding: $spacing-lg;
+  background: linear-gradient(135deg, #FFF9ED 0%, #FFF5E0 100%);
+  border: 2rpx solid $color-secondary;
+  border-radius: $radius-lg;
+  box-shadow: 0 4rpx 16rpx rgba(201, 169, 110, 0.15);
+}
+
+.nextActionHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.nextActionIcon {
+  font-size: 32rpx;
+}
+
+.nextActionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-primary-dark;
+}
+
+.nextActionDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.nextActionBtn {
+  margin-top: $spacing-md;
+  height: $button-height-md;
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-dark 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.statusHintText {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: $spacing-xs;
+  line-height: 1.5;
+}
+
+.feeTag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+  font-size: 20rpx;
+  margin-left: $spacing-xs;
+}
+
+.feeTagUrgent {
+  background: rgba(163, 61, 61, 0.1);
+  color: #A33D3D;
+}
+
+.feeTagDelivery {
+  background: rgba(74, 107, 138, 0.1);
+  color: #4A6B8A;
+}
+
+.billSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.billSummary {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.billSummaryIn {
+  color: $color-success;
+  font-weight: $font-weight-semibold;
+}
+
+.billSummaryOut {
+  color: $color-error;
+  font-weight: $font-weight-semibold;
+}

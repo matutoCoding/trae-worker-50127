@@ -12,14 +12,21 @@ const ExpressPage: React.FC = () => {
   const startDelivery = useAppStore(state => state.startDelivery);
   const completeDelivery = useAppStore(state => state.completeDelivery);
 
+  const [activeTab, setActiveTab] = useState<'pending' | 'completed'>('pending');
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [signRemark, setSignRemark] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
 
-  const urgentOrders = useMemo(() => {
+  const urgentPending = useMemo(() => {
     return orders.filter(o => o.isUrgent && ['待配送', '配送中', '定制中'].includes(o.status));
   }, [orders]);
+
+  const urgentCompleted = useMemo(() => {
+    return orders.filter(o => o.isUrgent && (o.status === '已完成'));
+  }, [orders]);
+
+  const currentList = activeTab === 'pending' ? urgentPending : urgentCompleted;
 
   const handleCall = (phone: string) => {
     Taro.showToast({ title: '拨打：' + phone, icon: 'none' });
@@ -61,9 +68,173 @@ const ExpressPage: React.FC = () => {
     Taro.showToast({ title: '导航到：' + address, icon: 'none' });
   };
 
-  const pendingCount = urgentOrders.filter(o => o.status !== '配送中').length;
-  const deliveringCount = urgentOrders.filter(o => o.status === '配送中').length;
-  const funeralCount = urgentOrders.filter(o => o.funeralHome).length;
+  const goDetail = (orderId: string) => {
+    Taro.navigateTo({ url: `/pages/order-detail/index?id=${orderId}` });
+  };
+
+  const pendingCount = urgentPending.filter(o => o.status !== '配送中').length;
+  const deliveringCount = urgentPending.filter(o => o.status === '配送中').length;
+  const completedCount = urgentCompleted.length;
+  const funeralCount = urgentPending.filter(o => o.funeralHome).length;
+
+  const getFinalTotal = (order: Order) => order.totalAmount + (order.deliveryFee || 0);
+
+  const renderOrderCard = (order: Order, isCompleted: boolean) => (
+    <View
+      key={order.id}
+      className={classnames(
+        styles.orderCard,
+        isCompleted && styles.completedCard,
+        styles.clickableCard
+      )}
+      onClick={() => goDetail(order.id)}
+    >
+      <Text className={styles.urgentBadge}>{isCompleted ? '✓ 已完成' : '⚡ 急单'}</Text>
+      <View className={styles.orderHeader}>
+        <Text className={styles.orderNo}>{order.orderNo}</Text>
+        <Text className={styles.orderStatus}>{order.status}</Text>
+      </View>
+
+      <View className={styles.customerRow}>
+        <View className={styles.customerInfo}>
+          <Text className={styles.customerName}>{order.customerName}</Text>
+          <Text className={styles.customerPhone}>{order.customerPhone}</Text>
+        </View>
+        <View className={styles.callBtn} onClick={(e) => { e.stopPropagation(); handleCall(order.customerPhone); }}>
+          📞
+        </View>
+      </View>
+
+      {order.funeralHome && (
+        <View className={styles.addressCard}>
+          <View className={styles.funeralHome}>
+            <Text>🏛️</Text>
+            <Text>殡仪馆直送：{order.funeralHome}</Text>
+          </View>
+          <Text className={styles.detailAddress}>{order.address}</Text>
+        </View>
+      )}
+
+      {!isCompleted && order.deliveryTime && (
+        <View className={styles.timeCard}>
+          <Text className={styles.timeLabel}>要求送达时间</Text>
+          <Text className={styles.timeValue}>⏰ {formatDateTime(order.deliveryTime)}</Text>
+        </View>
+      )}
+
+      {isCompleted && (
+        <View className={styles.completeInfo}>
+          <View className={styles.completeInfoRow}>
+            <Text className={styles.completeInfoLabel}>✅ 完成时间</Text>
+            <Text className={styles.completeInfoValue}>{order.deliverCompleteTime || '-'}</Text>
+          </View>
+          {order.signRemark && (
+            <View className={styles.completeInfoRow}>
+              <Text className={styles.completeInfoLabel}>📝 签收备注</Text>
+              <Text className={styles.completeInfoValue}>{order.signRemark}</Text>
+            </View>
+          )}
+          {order.deliveryFee !== undefined && order.deliveryFee > 0 && (
+            <View className={styles.completeInfoRow}>
+              <Text className={styles.completeInfoLabel}>🚚 配送服务费</Text>
+              <Text className={classnames(styles.completeInfoValue, styles.deliveryFeeHighlight)}>
+                +{formatPrice(order.deliveryFee)}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      <View className={styles.items}>
+        {order.items.map((item, idx) => (
+          <View key={idx} className={styles.item}>
+            <Text className={styles.itemName}>{item.productName}</Text>
+            <Text className={styles.itemPrice}>{formatPrice(item.price)} x{item.quantity}</Text>
+          </View>
+        ))}
+      </View>
+
+      {order.sizeInfo && (
+        <View style={{ marginBottom: '16rpx' }}>
+          <Text style={{ fontSize: '24rpx', color: '#4A3728' }}>
+            📐 尺寸：{order.sizeInfo.gender || ''}
+            {order.sizeInfo.height ? ` ${order.sizeInfo.height}cm` : ''}
+            {order.sizeInfo.weight ? ` ${order.sizeInfo.weight}kg` : ''}
+          </Text>
+        </View>
+      )}
+
+      {order.materialNames?.length > 0 && (
+        <View style={{ marginBottom: '16rpx' }}>
+          <Text style={{ fontSize: '24rpx', color: '#4A3728' }}>
+            🧵 材质：{order.materialNames.join('、')}
+          </Text>
+        </View>
+      )}
+
+      {order.remark && !isCompleted && (
+        <View style={{ marginBottom: '24rpx' }}>
+          <Text style={{ fontSize: '24rpx', color: '#A33D3D' }}>
+            备注：{order.remark}
+          </Text>
+        </View>
+      )}
+
+      <View className={styles.orderAmountRow}>
+        <Text className={styles.orderAmountLabel}>
+          {isCompleted ? '订单总计（含配送费）' : '订单金额'}
+        </Text>
+        <Text className={styles.orderAmountValue}>{formatPrice(getFinalTotal(order))}</Text>
+      </View>
+
+      {!isCompleted && (
+        <View className={styles.actionRow}>
+          <View
+            className={classnames(styles.actionBtn, styles.viewDetailBtn)}
+            onClick={(e) => { e.stopPropagation(); goDetail(order.id); }}
+          >
+            📋 详情
+          </View>
+          <View
+            className={classnames(styles.actionBtn)}
+            onClick={(e) => { e.stopPropagation(); handleNavigate(order.address); }}
+          >
+            📍 导航
+          </View>
+          {order.status === '配送中' ? (
+            <View
+              className={classnames(styles.actionBtn, styles.completeBtn)}
+              onClick={(e) => { e.stopPropagation(); handleOpenComplete(order); }}
+            >
+              配送完成
+            </View>
+          ) : order.status === '定制中' ? (
+            <View className={classnames(styles.actionBtn, styles.deliveredBtn)}>
+              定制中
+            </View>
+          ) : (
+            <View
+              className={classnames(styles.actionBtn, styles.primaryBtn)}
+              onClick={(e) => { e.stopPropagation(); handleDeliver(order.id, order.orderNo); }}
+            >
+              立即配送
+            </View>
+          )}
+        </View>
+      )}
+
+      {isCompleted && (
+        <View className={styles.actionRow}>
+          <View
+            className={classnames(styles.actionBtn, styles.viewDetailBtn)}
+            onClick={(e) => { e.stopPropagation(); goDetail(order.id); }}
+          >
+            📋 查看订单详情
+          </View>
+        </View>
+      )}
+    </View>
+  );
 
   return (
     <View className={styles.page}>
@@ -75,120 +246,48 @@ const ExpressPage: React.FC = () => {
       <View className={styles.statBar}>
         <View className={styles.statItem}>
           <Text className={styles.statNum}>{pendingCount}</Text>
-          <Text className={styles.statLabel}>待处理急单</Text>
+          <Text className={styles.statLabel}>待处理</Text>
         </View>
         <View className={styles.statItem}>
           <Text className={styles.statNum}>{deliveringCount}</Text>
           <Text className={styles.statLabel}>配送中</Text>
         </View>
         <View className={styles.statItem}>
+          <Text className={styles.statNum}>{completedCount}</Text>
+          <Text className={styles.statLabel}>已完成</Text>
+        </View>
+        <View className={styles.statItem}>
           <Text className={styles.statNum}>{funeralCount}</Text>
-          <Text className={styles.statLabel}>殡仪馆直送</Text>
+          <Text className={styles.statLabel}>殡仪馆</Text>
+        </View>
+      </View>
+
+      <View className={styles.tabsBar}>
+        <View
+          className={classnames(styles.tabItem, activeTab === 'pending' && styles.tabActive)}
+          onClick={() => setActiveTab('pending')}
+        >
+          待处理 ({urgentPending.length})
+        </View>
+        <View
+          className={classnames(styles.tabItem, activeTab === 'completed' && styles.tabActive)}
+          onClick={() => setActiveTab('completed')}
+        >
+          已完成 ({urgentCompleted.length})
         </View>
       </View>
 
       <View className={styles.orderList}>
-        {urgentOrders.length > 0 ? (
-          urgentOrders.map(order => (
-            <View key={order.id} className={styles.orderCard}>
-              <Text className={styles.urgentBadge}>⚡ 急单</Text>
-              <View className={styles.orderHeader}>
-                <Text className={styles.orderNo}>{order.orderNo}</Text>
-                <Text className={styles.orderStatus}>{order.status}</Text>
-              </View>
-
-              <View className={styles.customerRow}>
-                <View className={styles.customerInfo}>
-                  <Text className={styles.customerName}>{order.customerName}</Text>
-                  <Text className={styles.customerPhone}>{order.customerPhone}</Text>
-                </View>
-                <View className={styles.callBtn} onClick={() => handleCall(order.customerPhone)}>
-                  📞
-                </View>
-              </View>
-
-              {order.funeralHome && (
-                <View className={styles.addressCard}>
-                  <View className={styles.funeralHome}>
-                    <Text>🏛️</Text>
-                    <Text>殡仪馆直送：{order.funeralHome}</Text>
-                  </View>
-                  <Text className={styles.detailAddress}>{order.address}</Text>
-                </View>
-              )}
-
-              {order.deliveryTime && (
-                <View className={styles.timeCard}>
-                  <Text className={styles.timeLabel}>要求送达时间</Text>
-                  <Text className={styles.timeValue}>⏰ {formatDateTime(order.deliveryTime)}</Text>
-                </View>
-              )}
-
-              <View className={styles.items}>
-                {order.items.map((item, idx) => (
-                  <View key={idx} className={styles.item}>
-                    <Text className={styles.itemName}>{item.productName}</Text>
-                    <Text className={styles.itemPrice}>{formatPrice(item.price)} x{item.quantity}</Text>
-                  </View>
-                ))}
-              </View>
-
-              {order.sizeInfo && (
-                <View style={{ marginBottom: '16rpx' }}>
-                  <Text style={{ fontSize: '24rpx', color: '#4A3728' }}>
-                    📐 尺寸：{order.sizeInfo.gender || ''}
-                    {order.sizeInfo.height ? ` ${order.sizeInfo.height}cm` : ''}
-                    {order.sizeInfo.weight ? ` ${order.sizeInfo.weight}kg` : ''}
-                  </Text>
-                </View>
-              )}
-
-              {order.materialNames?.length > 0 && (
-                <View style={{ marginBottom: '16rpx' }}>
-                  <Text style={{ fontSize: '24rpx', color: '#4A3728' }}>
-                    🧵 材质：{order.materialNames.join('、')}
-                  </Text>
-                </View>
-              )}
-
-              {order.remark && (
-                <View style={{ marginBottom: '24rpx' }}>
-                  <Text style={{ fontSize: '24rpx', color: '#A33D3D' }}>
-                    备注：{order.remark}
-                  </Text>
-                </View>
-              )}
-
-              <View className={styles.actionRow}>
-                <View className={styles.actionBtn} onClick={() => handleNavigate(order.address)}>
-                  📍 导航
-                </View>
-                {order.status === '配送中' ? (
-                  <View
-                    className={classnames(styles.actionBtn, styles.completeBtn)}
-                    onClick={() => handleOpenComplete(order)}
-                  >
-                    配送完成
-                  </View>
-                ) : order.status === '定制中' ? (
-                  <View className={classnames(styles.actionBtn, styles.deliveredBtn)}>
-                    定制中
-                  </View>
-                ) : (
-                  <View
-                    className={classnames(styles.actionBtn, styles.primaryBtn)}
-                    onClick={() => handleDeliver(order.id, order.orderNo)}
-                  >
-                    立即配送
-                  </View>
-                )}
-              </View>
-            </View>
-          ))
+        {currentList.length > 0 ? (
+          currentList.map(order => renderOrderCard(order, activeTab === 'completed'))
         ) : (
           <View style={{ padding: '80rpx 0', textAlign: 'center' }}>
-            <Text style={{ fontSize: '60rpx', display: 'block', marginBottom: '24rpx', opacity: 0.3 }}>✅</Text>
-            <Text style={{ fontSize: '28rpx', color: '#8A7A6A' }}>暂无急单，一切顺利</Text>
+            <Text style={{ fontSize: '60rpx', display: 'block', marginBottom: '24rpx', opacity: 0.3 }}>
+              {activeTab === 'pending' ? '✅' : '📦'}
+            </Text>
+            <Text style={{ fontSize: '28rpx', color: '#8A7A6A' }}>
+              {activeTab === 'pending' ? '暂无急单，一切顺利' : '暂无已完成急单'}
+            </Text>
           </View>
         )}
       </View>

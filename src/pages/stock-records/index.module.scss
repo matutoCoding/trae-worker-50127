@@ -350,3 +350,166 @@
   border-radius: $radius-sm;
   margin-right: $spacing-sm;
 }
+
+.filterSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.filterRow {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+}
+
+.dateSelectWrap {
+  flex: 1;
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.dateBtn {
+  flex: 1;
+  height: 64rpx;
+  padding: 0 $spacing-md;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  background: $color-bg-page;
+
+  &.placeholder {
+    color: $color-text-tertiary;
+  }
+}
+
+.shortcutBtns {
+  display: flex;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+}
+
+.shortcutBtn {
+  padding: 8rpx 20rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+  font-size: 22rpx;
+  color: $color-text-secondary;
+
+  &.active {
+    background: $color-primary;
+    color: $color-text-white;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.currentFilterInfo {
+  padding: $spacing-sm $page-padding;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(201, 169, 110, 0.08);
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.filterInfoText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  flex: 1;
+}
+
+.filterInfoTag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background: $color-bg-card;
+  border-radius: $radius-xs;
+  margin-right: $spacing-xs;
+  font-size: 22rpx;
+  color: $color-primary-dark;
+  font-weight: $font-weight-medium;
+}
+
+.clearFilterBtn {
+  padding: 8rpx 20rpx;
+  background: $color-bg-card;
+  border-radius: $radius-sm;
+  font-size: 22rpx;
+  color: $color-error;
+  font-weight: $font-weight-medium;
+  margin-left: $spacing-sm;
+}
+
+.recentTip {
+  margin: $spacing-sm $page-padding;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, #FFF9ED 0%, #FFF5E0 100%);
+  border: 1rpx solid $color-secondary;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+}
+
+.recentTipIcon {
+  font-size: 28rpx;
+  flex-shrink: 0;
+}
+
+.recentTipText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.recentTipTitle {
+  font-weight: $font-weight-semibold;
+  color: $color-primary-dark;
+  margin-bottom: 4rpx;
+  display: block;
+}
+
+.dateRangeRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.dateRangeLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  white-space: nowrap;
+}
+
+.searchBar {
+  flex: 1;
+  height: 64rpx;
+  background: $color-bg-page;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-md;
+  padding: 0 $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.searchIcon {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
