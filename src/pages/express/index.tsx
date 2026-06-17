@@ -1,0 +1,131 @@
+import React, { useMemo } from 'react';
+import { View, Text } from '@tarojs/components';
+import Taro from '@tarojs/taro';
+import { orders } from '@/data/orders';
+import { formatPrice, formatDateTime } from '@/utils';
+import classnames from 'classnames';
+import styles from './index.module.scss';
+
+const ExpressPage: React.FC = () => {
+  const urgentOrders = useMemo(() => {
+    return orders.filter(o => o.isUrgent && ['待配送', '配送中', '定制中'].includes(o.status));
+  }, []);
+
+  const handleCall = (phone: string) => {
+    Taro.showToast({ title: '拨打：' + phone, icon: 'none' });
+  };
+
+  const handleDeliver = (orderNo: string) => {
+    Taro.showModal({
+      title: '确认配送',
+      content: `确认订单 ${orderNo} 已安排配送？`,
+      success: (res) => {
+        if (res.confirm) {
+          Taro.showToast({ title: '已安排配送', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const handleNavigate = (address: string) => {
+    Taro.showToast({ title: '导航到：' + address, icon: 'none' });
+  };
+
+  return (
+    <View className={styles.page}>
+      <View className={styles.header}>
+        <Text className={styles.headerTitle}>🚨 急单配送中心</Text>
+        <Text className={styles.headerDesc}>优先处理加急订单，确保按时送达殡仪馆</Text>
+      </View>
+
+      <View className={styles.statBar}>
+        <View className={styles.statItem}>
+          <Text className={styles.statNum}>{urgentOrders.length}</Text>
+          <Text className={styles.statLabel}>待处理急单</Text>
+        </View>
+        <View className={styles.statItem}>
+          <Text className={styles.statNum}>{urgentOrders.filter(o => o.status === '配送中').length}</Text>
+          <Text className={styles.statLabel}>配送中</Text>
+        </View>
+        <View className={styles.statItem}>
+          <Text className={styles.statNum}>{urgentOrders.filter(o => o.funeralHome).length}</Text>
+          <Text className={styles.statLabel}>殡仪馆直送</Text>
+        </View>
+      </View>
+
+      <View className={styles.orderList}>
+        {urgentOrders.length > 0 ? (
+          urgentOrders.map(order => (
+            <View key={order.id} className={styles.orderCard}>
+              <Text className={styles.urgentBadge}>⚡ 急单</Text>
+              <View className={styles.orderHeader}>
+                <Text className={styles.orderNo}>{order.orderNo}</Text>
+                <Text className={styles.orderStatus}>{order.status}</Text>
+              </View>
+
+              <View className={styles.customerRow}>
+                <View className={styles.customerInfo}>
+                  <Text className={styles.customerName}>{order.customerName}</Text>
+                  <Text className={styles.customerPhone}>{order.customerPhone}</Text>
+                </View>
+                <View className={styles.callBtn} onClick={() => handleCall(order.customerPhone)}>
+                  📞
+                </View>
+              </View>
+
+              {order.funeralHome && (
+                <View className={styles.addressCard}>
+                  <View className={styles.funeralHome}>
+                    <Text>🏛️</Text>
+                    <Text>殡仪馆直送：{order.funeralHome}</Text>
+                  </View>
+                  <Text className={styles.detailAddress}>{order.address}</Text>
+                </View>
+              )}
+
+              {order.deliveryTime && (
+                <View className={styles.timeCard}>
+                  <Text className={styles.timeLabel}>要求送达时间</Text>
+                  <Text className={styles.timeValue}>⏰ {formatDateTime(order.deliveryTime)}</Text>
+                </View>
+              )}
+
+              <View className={styles.items}>
+                {order.items.map((item, idx) => (
+                  <View key={idx} className={styles.item}>
+                    <Text className={styles.itemName}>{item.productName}</Text>
+                    <Text className={styles.itemPrice}>{formatPrice(item.price)} x{item.quantity}</Text>
+                  </View>
+                ))}
+              </View>
+
+              {order.remark && (
+                <View style={{ marginBottom: '24rpx' }}>
+                  <Text style={{ fontSize: '24rpx', color: '#A33D3D' }}>
+                    备注：{order.remark}
+                  </Text>
+                </View>
+              )}
+
+              <View className={styles.actionRow}>
+                <View className={styles.actionBtn} onClick={() => handleNavigate(order.address)}>
+                  📍 导航
+                </View>
+                <View className={classnames(styles.actionBtn, styles.primaryBtn)} onClick={() => handleDeliver(order.orderNo)}>
+                  立即配送
+                </View>
+              </View>
+            </View>
+          ))
+        ) : (
+          <View style={{ padding: '80rpx 0', textAlign: 'center' }}>
+            <Text style={{ fontSize: '60rpx', display: 'block', marginBottom: '24rpx', opacity: 0.3 }}>✅</Text>
+            <Text style={{ fontSize: '28rpx', color: '#8A7A6A' }}>暂无急单，一切顺利</Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+};
+
+export default ExpressPage;

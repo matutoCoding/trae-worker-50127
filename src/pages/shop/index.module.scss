@@ -1,0 +1,254 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary-dark 0%, $color-primary 50%, $color-secondary-dark 100%);
+  padding: $spacing-xl $page-padding;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -100rpx;
+  right: -100rpx;
+  width: 300rpx;
+  height: 300rpx;
+  background: radial-gradient(circle, rgba(201, 169, 110, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.shopInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.shopAvatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: $radius-lg;
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+}
+
+.shopDetail {
+  flex: 1;
+}
+
+.shopName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: 4rpx;
+}
+
+.shopAddr {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+}
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin: $spacing-md $page-padding;
+  box-shadow: $shadow-card;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.cardTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.cardIcon {
+  color: $color-secondary-dark;
+}
+
+.cardMore {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.funcGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-md;
+}
+
+.funcItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md 0;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.funcIcon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+}
+
+.func1 { background: rgba(61, 122, 61, 0.12); }
+.func2 { background: rgba(196, 130, 0, 0.12); }
+.func3 { background: rgba(74, 107, 138, 0.12); }
+.func4 { background: rgba(163, 61, 61, 0.12); }
+.func5 { background: rgba(74, 55, 40, 0.1); }
+.func6 { background: rgba(201, 169, 110, 0.2); }
+.func7 { background: rgba(61, 122, 61, 0.1); }
+.func8 { background: rgba(74, 107, 138, 0.1); }
+
+.funcName {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.warnItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+  }
+}
+
+.warnInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.warnName {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.warnMeta {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.warnStatus {
+  font-size: $font-size-xs;
+  padding: 6rpx 16rpx;
+  border-radius: $radius-sm;
+  font-weight: $font-weight-medium;
+}
+
+.warnStock {
+  background: rgba(196, 130, 0, 0.1);
+  color: $color-warning;
+}
+
+.warnOut {
+  background: rgba(163, 61, 61, 0.1);
+  color: $color-error;
+}
+
+.billItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+  }
+}
+
+.billInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.billCategory {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+}
+
+.billDate {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.billAmount {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+}
+
+.amountIn { color: $color-success; }
+.amountOut { color: $color-error; }
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  padding-top: $spacing-md;
+  margin-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.summaryItem {
+  text-align: center;
+  flex: 1;
+}
+
+.summaryLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 4rpx;
+}
+
+.summaryValue {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.summaryIncome { color: $color-success; }
+.summaryExpense { color: $color-error; }
+.summaryNet { color: $color-primary; }

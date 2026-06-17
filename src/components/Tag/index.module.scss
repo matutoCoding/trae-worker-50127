@@ -1,0 +1,63 @@
+@use '@/styles/variables.scss' as *;
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.primary {
+  background: rgba(74, 55, 40, 0.08);
+  color: $color-primary;
+}
+
+.secondary {
+  background: rgba(201, 169, 110, 0.15);
+  color: $color-secondary-dark;
+}
+
+.success {
+  background: rgba(61, 122, 61, 0.1);
+  color: $color-success;
+}
+
+.warning {
+  background: rgba(196, 130, 0, 0.1);
+  color: $color-warning;
+}
+
+.error {
+  background: rgba(163, 61, 61, 0.1);
+  color: $color-error;
+}
+
+.info {
+  background: rgba(74, 107, 138, 0.1);
+  color: $color-info;
+}
+
+.hot {
+  background: linear-gradient(135deg, #A33D3D 0%, #C48200 100%);
+  color: $color-text-white;
+}
+
+.new {
+  background: linear-gradient(135deg, #3D7A3D 0%, #4A6B8A 100%);
+  color: $color-text-white;
+}
+
+.gold {
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+  color: $color-primary-dark;
+}
+
+.outline {
+  background: transparent;
+  border: 1rpx solid $color-border;
+  color: $color-text-secondary;
+}

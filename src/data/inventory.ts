@@ -1,0 +1,243 @@
+import { InventoryItem, BillRecord, StatItem } from '@/types';
+
+export const inventoryItems: InventoryItem[] = [
+  {
+    id: 'i001',
+    name: '福寿双全男款寿衣套装',
+    category: '套装',
+    sku: 'SZ-TZ-001',
+    stock: 12,
+    minStock: 5,
+    unit: '套',
+    location: 'A区01货架',
+    lastUpdate: '2026-06-16 18:30',
+    status: '正常',
+    recentIn: 5,
+    recentOut: 3
+  },
+  {
+    id: 'i002',
+    name: '凤穿牡丹女款寿衣套装',
+    category: '套装',
+    sku: 'SZ-TZ-002',
+    stock: 8,
+    minStock: 5,
+    unit: '套',
+    location: 'A区02货架',
+    lastUpdate: '2026-06-17 09:15',
+    status: '正常',
+    recentIn: 3,
+    recentOut: 2
+  },
+  {
+    id: 'i003',
+    name: '金丝楠木寿材',
+    category: '寿材',
+    sku: 'SZ-SC-001',
+    stock: 3,
+    minStock: 2,
+    unit: '具',
+    location: 'C区大货区',
+    lastUpdate: '2026-06-10 14:20',
+    status: '预警',
+    recentIn: 0,
+    recentOut: 1
+  },
+  {
+    id: 'i004',
+    name: '柏木福寿寿材',
+    category: '寿材',
+    sku: 'SZ-SC-002',
+    stock: 6,
+    minStock: 3,
+    unit: '具',
+    location: 'C区大货区',
+    lastUpdate: '2026-06-14 11:00',
+    status: '正常',
+    recentIn: 2,
+    recentOut: 1
+  },
+  {
+    id: 'i005',
+    name: '云锦唐装寿衣',
+    category: '寿衣',
+    sku: 'SZ-SY-001',
+    stock: 15,
+    minStock: 8,
+    unit: '件',
+    location: 'B区01货架',
+    lastUpdate: '2026-06-15 16:45',
+    status: '正常',
+    recentIn: 10,
+    recentOut: 4
+  },
+  {
+    id: 'i006',
+    name: '真丝绣裙寿裤',
+    category: '寿衣',
+    sku: 'SZ-SY-002',
+    stock: 20,
+    minStock: 10,
+    unit: '件',
+    location: 'B区02货架',
+    lastUpdate: '2026-06-16 10:30',
+    status: '正常',
+    recentIn: 0,
+    recentOut: 5
+  },
+  {
+    id: 'i007',
+    name: '五福捧寿寿被',
+    category: '配饰',
+    sku: 'SZ-PS-001',
+    stock: 30,
+    minStock: 15,
+    unit: '条',
+    location: 'D区01货架',
+    lastUpdate: '2026-06-17 08:00',
+    status: '正常',
+    recentIn: 20,
+    recentOut: 8
+  },
+  {
+    id: 'i008',
+    name: '铺金盖银寿褥套装',
+    category: '配饰',
+    sku: 'SZ-PS-002',
+    stock: 18,
+    minStock: 10,
+    unit: '套',
+    location: 'D区02货架',
+    lastUpdate: '2026-06-16 15:20',
+    status: '正常',
+    recentIn: 5,
+    recentOut: 6
+  },
+  {
+    id: 'i009',
+    name: '寿帽寿鞋全套配饰',
+    category: '配饰',
+    sku: 'SZ-PS-003',
+    stock: 25,
+    minStock: 20,
+    unit: '套',
+    location: 'D区03货架',
+    lastUpdate: '2026-06-15 09:30',
+    status: '正常',
+    recentIn: 15,
+    recentOut: 3
+  },
+  {
+    id: 'i010',
+    name: '现代简约寿衣套装',
+    category: '套装',
+    sku: 'SZ-TZ-003',
+    stock: 10,
+    minStock: 5,
+    unit: '套',
+    location: 'A区03货架',
+    lastUpdate: '2026-06-12 14:00',
+    status: '正常',
+    recentIn: 8,
+    recentOut: 1
+  },
+  {
+    id: 'i011',
+    name: '骨灰盒-黑檀木雕花',
+    category: '寿材',
+    sku: 'SZ-SC-003',
+    stock: 5,
+    minStock: 3,
+    unit: '个',
+    location: 'E区展示柜',
+    lastUpdate: '2026-06-14 11:30',
+    status: '正常',
+    recentIn: 3,
+    recentOut: 2
+  },
+  {
+    id: 'i012',
+    name: '骨灰盒-汉白玉素面',
+    category: '寿材',
+    sku: 'SZ-SC-004',
+    stock: 1,
+    minStock: 3,
+    unit: '个',
+    location: 'E区展示柜',
+    lastUpdate: '2026-06-16 16:00',
+    status: '缺货',
+    recentIn: 0,
+    recentOut: 2
+  },
+  {
+    id: 'i013',
+    name: '真丝织锦面料',
+    category: '面料',
+    sku: 'ML-001',
+    stock: 86,
+    minStock: 50,
+    unit: '米',
+    location: 'F区布料仓',
+    lastUpdate: '2026-06-10 10:00',
+    status: '正常',
+    recentIn: 0,
+    recentOut: 12
+  },
+  {
+    id: 'i014',
+    name: '南京云锦面料',
+    category: '面料',
+    sku: 'ML-002',
+    stock: 8,
+    minStock: 20,
+    unit: '米',
+    location: 'F区布料仓',
+    lastUpdate: '2026-06-08 15:30',
+    status: '预警',
+    recentIn: 0,
+    recentOut: 5
+  },
+  {
+    id: 'i015',
+    name: '新疆棉花填充物',
+    category: '填充物',
+    sku: 'TC-001',
+    stock: 500,
+    minStock: 200,
+    unit: '斤',
+    location: 'G区原料仓',
+    lastUpdate: '2026-06-05 09:00',
+    status: '正常',
+    recentIn: 300,
+    recentOut: 80
+  }
+];
+
+export const billRecords: BillRecord[] = [
+  { id: 'b001', date: '2026-06-17', type: '收入', category: '寿衣销售', amount: 3760, orderNo: 'FS202606170001', remark: '福寿双全男款套装+寿褥' },
+  { id: 'b002', date: '2026-06-17', type: '支出', category: '物流配送', amount: 180, remark: '八宝山急单配送费' },
+  { id: 'b003', date: '2026-06-16', type: '收入', category: '寿材销售', amount: 18800, orderNo: 'FS202606160005', remark: '金丝楠木寿材' },
+  { id: 'b004', date: '2026-06-16', type: '收入', category: '定制服务费', amount: 500, orderNo: 'FS202606170002', remark: '量身定制费用' },
+  { id: 'b005', date: '2026-06-16', type: '支出', category: '原料采购', amount: 12600, remark: '真丝织锦+云锦面料采购' },
+  { id: 'b006', date: '2026-06-15', type: '收入', category: '骨灰盒销售', amount: 3680, orderNo: 'FS202606150012', remark: '黑檀木雕花骨灰盒' },
+  { id: 'b007', date: '2026-06-15', type: '支出', category: '员工工资', amount: 28500, remark: '6月上半月工资发放' },
+  { id: 'b008', date: '2026-06-14', type: '收入', category: '寿衣销售', amount: 1880, orderNo: 'FS202606150012', remark: '现代简约寿衣套装' },
+  { id: 'b009', date: '2026-06-14', type: '支出', category: '场地租金', amount: 15000, remark: '门店月度租金' },
+  { id: 'b010', date: '2026-06-13', type: '收入', category: '寿材销售', amount: 8800, orderNo: 'FS202606140008', remark: '柏木福寿寿材（部分退款）' },
+  { id: 'b011', date: '2026-06-13', type: '支出', category: '退款', amount: 8800, orderNo: 'FS202606140008', remark: '换货退款' },
+  { id: 'b012', date: '2026-06-12', type: '收入', category: '配饰销售', amount: 1720, remark: '寿被+寿帽+寿鞋等' }
+];
+
+export const todayStats: StatItem[] = [
+  { label: '今日订单', value: 6, unit: '单', trend: 2 },
+  { label: '今日收入', value: '26,740', unit: '元', trend: 12.5 },
+  { label: '待配送', value: 3, unit: '单' },
+  { label: '急单处理', value: 2, unit: '单' }
+];
+
+export const monthStats: StatItem[] = [
+  { label: '本月订单', value: 86, unit: '单', trend: 8.3 },
+  { label: '本月营收', value: '328,560', unit: '元', trend: 15.2 },
+  { label: '库存预警', value: 3, unit: '项' },
+  { label: '待对账', value: 2, unit: '笔' }
+];
