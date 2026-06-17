@@ -1,26 +1,30 @@
 import React, { useMemo } from 'react';
 import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { orders } from '@/data/orders';
+import { useAppStore } from '@/store';
 import { formatPrice, formatDateTime } from '@/utils';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 
 const ExpressPage: React.FC = () => {
+  const orders = useAppStore(state => state.orders);
+  const startDelivery = useAppStore(state => state.startDelivery);
+
   const urgentOrders = useMemo(() => {
     return orders.filter(o => o.isUrgent && ['待配送', '配送中', '定制中'].includes(o.status));
-  }, []);
+  }, [orders]);
 
   const handleCall = (phone: string) => {
     Taro.showToast({ title: '拨打：' + phone, icon: 'none' });
   };
 
-  const handleDeliver = (orderNo: string) => {
+  const handleDeliver = (orderId: string, orderNo: string) => {
     Taro.showModal({
       title: '确认配送',
       content: `确认订单 ${orderNo} 已安排配送？`,
       success: (res) => {
         if (res.confirm) {
+          startDelivery(orderId);
           Taro.showToast({ title: '已安排配送', icon: 'success' });
         }
       }
@@ -31,6 +35,10 @@ const ExpressPage: React.FC = () => {
     Taro.showToast({ title: '导航到：' + address, icon: 'none' });
   };
 
+  const pendingCount = urgentOrders.filter(o => o.status !== '配送中').length;
+  const deliveringCount = urgentOrders.filter(o => o.status === '配送中').length;
+  const funeralCount = urgentOrders.filter(o => o.funeralHome).length;
+
   return (
     <View className={styles.page}>
       <View className={styles.header}>
@@ -40,15 +48,15 @@ const ExpressPage: React.FC = () => {
 
       <View className={styles.statBar}>
         <View className={styles.statItem}>
-          <Text className={styles.statNum}>{urgentOrders.length}</Text>
+          <Text className={styles.statNum}>{pendingCount}</Text>
           <Text className={styles.statLabel}>待处理急单</Text>
         </View>
         <View className={styles.statItem}>
-          <Text className={styles.statNum}>{urgentOrders.filter(o => o.status === '配送中').length}</Text>
+          <Text className={styles.statNum}>{deliveringCount}</Text>
           <Text className={styles.statLabel}>配送中</Text>
         </View>
         <View className={styles.statItem}>
-          <Text className={styles.statNum}>{urgentOrders.filter(o => o.funeralHome).length}</Text>
+          <Text className={styles.statNum}>{funeralCount}</Text>
           <Text className={styles.statLabel}>殡仪馆直送</Text>
         </View>
       </View>
@@ -99,6 +107,24 @@ const ExpressPage: React.FC = () => {
                 ))}
               </View>
 
+              {order.sizeInfo && (
+                <View style={{ marginBottom: '16rpx' }}>
+                  <Text style={{ fontSize: '24rpx', color: '#4A3728' }}>
+                    📐 尺寸：{order.sizeInfo.gender || ''}
+                    {order.sizeInfo.height ? ` ${order.sizeInfo.height}cm` : ''}
+                    {order.sizeInfo.weight ? ` ${order.sizeInfo.weight}kg` : ''}
+                  </Text>
+                </View>
+              )}
+
+              {order.materialNames?.length > 0 && (
+                <View style={{ marginBottom: '16rpx' }}>
+                  <Text style={{ fontSize: '24rpx', color: '#4A3728' }}>
+                    🧵 材质：{order.materialNames.join('、')}
+                  </Text>
+                </View>
+              )}
+
               {order.remark && (
                 <View style={{ marginBottom: '24rpx' }}>
                   <Text style={{ fontSize: '24rpx', color: '#A33D3D' }}>
@@ -111,9 +137,18 @@ const ExpressPage: React.FC = () => {
                 <View className={styles.actionBtn} onClick={() => handleNavigate(order.address)}>
                   📍 导航
                 </View>
-                <View className={classnames(styles.actionBtn, styles.primaryBtn)} onClick={() => handleDeliver(order.orderNo)}>
-                  立即配送
-                </View>
+                {order.status === '配送中' ? (
+                  <View className={classnames(styles.actionBtn, styles.deliveredBtn)}>
+                    配送中...
+                  </View>
+                ) : (
+                  <View
+                    className={classnames(styles.actionBtn, styles.primaryBtn)}
+                    onClick={() => handleDeliver(order.id, order.orderNo)}
+                  >
+                    立即配送
+                  </View>
+                )}
               </View>
             </View>
           ))

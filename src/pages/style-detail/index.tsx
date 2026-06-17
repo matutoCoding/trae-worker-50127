@@ -10,7 +10,8 @@ import styles from './index.module.scss';
 
 const StyleDetailPage: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState('');
-  const addSelectedProduct = useAppStore(state => state.addSelectedProduct);
+  const addCustomItem = useAppStore(state => state.addCustomItem);
+  const customList = useAppStore(state => state.customList);
 
   const productId = Taro.getCurrentInstance().router?.params?.id || '';
 
@@ -18,13 +19,22 @@ const StyleDetailPage: React.FC = () => {
     return products.find(p => p.id === productId) || products[0];
   }, [productId]);
 
+  const currentCustomCount = useMemo(() => {
+    return customList
+      .filter(c => c.productId === product.id)
+      .reduce((sum, c) => sum + c.quantity, 0);
+  }, [customList, product.id]);
+
   const handleAddToOrder = () => {
     if (!selectedSize && product.sizes.length > 0) {
       Taro.showToast({ title: '请选择尺寸', icon: 'none' });
       return;
     }
-    addSelectedProduct(product);
-    Taro.showToast({ title: '已加入定制单', icon: 'success' });
+    addCustomItem(product, selectedSize || undefined);
+    Taro.showToast({
+      title: `已加入定制清单（${currentCustomCount + 1}件）`,
+      icon: 'success'
+    });
   };
 
   const handleCustom = () => {
@@ -52,6 +62,7 @@ const StyleDetailPage: React.FC = () => {
         </View>
         <Text className={styles.stockInfo}>
           分类：{product.subCategory} · 库存：{product.stock} 件
+          {currentCustomCount > 0 && ` · 已选：${currentCustomCount}件`}
         </Text>
         <View className={styles.tagList} style={{ marginTop: '24rpx' }}>
           {product.tags.map((tag, idx) => (
@@ -124,10 +135,10 @@ const StyleDetailPage: React.FC = () => {
 
       <View className={styles.bottomBar}>
         <View className={styles.secondaryBtn} onClick={handleCustom}>
-          去定制
+          查看定制清单（{customList.length}）
         </View>
         <View className={styles.primaryBtn} onClick={handleAddToOrder}>
-          加入订单
+          加入定制清单
         </View>
       </View>
     </View>

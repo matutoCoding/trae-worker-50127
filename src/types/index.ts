@@ -54,6 +54,14 @@ export interface Order {
   deliveryTime?: string;
   remark?: string;
   taboos?: string;
+  sizeInfo?: Partial<SizeRecord>;
+  materialNames?: string[];
+  returnInfo?: {
+    type: '退货' | '换货' | null;
+    reason: string;
+    handleTime?: string;
+    refundAmount?: number;
+  };
 }
 
 export interface InventoryItem {
@@ -99,4 +107,27 @@ export interface StatItem {
   value: number | string;
   unit?: string;
   trend?: number;
+}
+
+export interface CustomItem {
+  id: string;
+  productId: string;
+  productName: string;
+  productImage: string;
+  price: number;
+  quantity: number;
+  selectedSize?: string;
+  selectedMaterial?: string;
+  addedAt: string;
+}
+
+export interface StockRecord {
+  id: string;
+  itemId: string;
+  itemName: string;
+  type: '入库' | '出库';
+  quantity: number;
+  operator: string;
+  date: string;
+  remark?: string;
 }

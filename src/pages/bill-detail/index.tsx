@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { billRecords } from '@/data/inventory';
+import { useAppStore } from '@/store';
 import { formatPrice } from '@/utils';
 import classnames from 'classnames';
 import styles from './index.module.scss';
@@ -10,12 +10,13 @@ type TabType = 'all' | 'in' | 'out';
 
 const BillDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('all');
+  const billRecords = useAppStore(s => s.billRecords);
 
   const summary = useMemo(() => {
     const income = billRecords.filter(b => b.type === '收入').reduce((s, b) => s + b.amount, 0);
     const expense = billRecords.filter(b => b.type === '支出').reduce((s, b) => s + b.amount, 0);
     return { income, expense, net: income - expense };
-  }, []);
+  }, [billRecords]);
 
   const groupedBills = useMemo(() => {
     let records = billRecords;
@@ -33,7 +34,7 @@ const BillDetailPage: React.FC = () => {
       groups[record.date].push(record);
     });
     return groups;
-  }, [activeTab]);
+  }, [activeTab, billRecords]);
 
   const handleExport = () => {
     Taro.showToast({ title: '对账单导出中...', icon: 'loading' });

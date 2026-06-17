@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { inventoryItems } from '@/data/inventory';
+import { useAppStore } from '@/store';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 
@@ -10,6 +10,7 @@ const filters = ['全部', '正常', '预警', '缺货'];
 const InventoryDetailPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('全部');
   const [searchText, setSearchText] = useState('');
+  const inventoryItems = useAppStore(s => s.inventoryItems);
 
   const routerParams = Taro.getCurrentInstance().router?.params;
   React.useEffect(() => {
@@ -36,7 +37,7 @@ const InventoryDetailPage: React.FC = () => {
       );
     }
     return result;
-  }, [activeFilter, searchText]);
+  }, [activeFilter, searchText, inventoryItems]);
 
   const getStatusClass = (status: string) => {
     switch (status) {

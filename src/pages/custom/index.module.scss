@@ -333,3 +333,259 @@
     transform: scale(0.98);
   }
 }
+
+.customList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.customItem {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+}
+
+.customItemImg {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+  background: $color-bg-card;
+}
+
+.customItemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.customItemName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.customItemMeta {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.customItemBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $spacing-sm;
+}
+
+.customItemPrice {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.qtyControl {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.qtyBtn {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  background: $color-bg-card;
+  border: 2rpx solid $color-border;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.qtyValue {
+  min-width: 60rpx;
+  text-align: center;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.removeBtn {
+  font-size: $font-size-sm;
+  color: $color-error;
+  padding: $spacing-xs $spacing-sm;
+}
+
+.emptyCustom {
+  padding: 60rpx 0;
+  text-align: center;
+}
+
+.emptyCustomIcon {
+  font-size: 80rpx;
+  opacity: 0.3;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.emptyCustomText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-lg;
+  display: block;
+}
+
+.browseBtn {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm $spacing-xl;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.formInput {
+  height: 80rpx;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  padding: 0 $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: 100%;
+    height: 100%;
+    font-size: $font-size-md;
+  }
+}
+
+.formTextarea {
+  min-height: 160rpx;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: 1.5;
+
+  textarea {
+    width: 100%;
+    height: 100%;
+    font-size: $font-size-md;
+    min-height: 140rpx;
+  }
+}
+
+.urgentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, #FFF5E5 0%, #FFE8D6 100%);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+}
+
+.urgentInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.urgentText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-error;
+}
+
+.urgentDesc {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+}
+
+.switchWrap {
+  width: 100rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  background: $color-border;
+  position: relative;
+  transition: all $transition-base;
+}
+
+.switchWrapActive {
+  background: $color-error;
+}
+
+.switchDot {
+  position: absolute;
+  top: 6rpx;
+  left: 6rpx;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: $color-bg-card;
+  transition: all $transition-base;
+}
+
+.switchDotActive {
+  left: 50rpx;
+}
+
+.priceBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  padding: $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+}
+
+.priceLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.priceLineTotal {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  padding-top: $spacing-sm;
+  margin-top: $spacing-xs;
+  border-top: 2rpx dashed $color-border;
+}
+
+.selectedPrice {
+  font-size: $font-size-sm;
+  color: $color-secondary-dark;
+  margin-right: $spacing-md;
+}

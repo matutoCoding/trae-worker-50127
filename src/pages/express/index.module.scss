@@ -259,3 +259,9 @@
   font-weight: $font-weight-semibold;
   box-shadow: 0 4rpx 12rpx rgba(163, 61, 61, 0.25);
 }
+
+.deliveredBtn {
+  background: linear-gradient(135deg, #4A6B8A 0%, #3D7A3D 100%);
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Input, Image, ScrollView } from '@tarojs/components';
+import { View, Text, Input, Image, ScrollView, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { products } from '@/data/products';
 import { materials, materialCategories } from '@/data/materials';
@@ -11,27 +11,50 @@ import Tag from '@/components/Tag';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 
-type TabType = 'size' | 'material' | 'match' | 'taboo';
+type TabType = 'list' | 'size' | 'material' | 'match' | 'taboo' | 'info';
 
 const CustomPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('size');
+  const [activeTab, setActiveTab] = useState<TabType>('list');
   const [materialCategory, setMaterialCategory] = useState('全部');
 
+  const customList = useAppStore(state => state.customList);
+  const removeCustomItem = useAppStore(state => state.removeCustomItem);
+  const updateCustomItemQuantity = useAppStore(state => state.updateCustomItemQuantity);
   const sizeRecord = useAppStore(state => state.sizeRecord);
   const setSizeRecord = useAppStore(state => state.setSizeRecord);
   const selectedMaterialIds = useAppStore(state => state.selectedMaterialIds);
   const toggleMaterialId = useAppStore(state => state.toggleMaterialId);
+  const submitCustomOrder = useAppStore(state => state.submitCustomOrder);
+
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [funeralHome, setFuneralHome] = useState('');
+  const [remark, setRemark] = useState('');
+  const [taboos, setTaboos] = useState('');
+  const [isUrgent, setIsUrgent] = useState(false);
 
   const filteredMaterials = useMemo(() => {
     if (materialCategory === '全部') return materials;
     return materials.filter(m => m.category === materialCategory);
   }, [materialCategory]);
 
-  const totalMaterialPrice = useMemo(() => {
-    return materials
-      .filter(m => selectedMaterialIds.includes(m.id))
-      .reduce((sum, m) => sum + m.price, 0);
+  const selectedMaterials = useMemo(() => {
+    return materials.filter(m => selectedMaterialIds.includes(m.id));
   }, [selectedMaterialIds]);
+
+  const totalMaterialPrice = useMemo(() => {
+    return selectedMaterials.reduce((sum, m) => sum + m.price, 0);
+  }, [selectedMaterials]);
+
+  const totalItemsPrice = useMemo(() => {
+    return customList.reduce((sum, ci) => sum + ci.price * ci.quantity, 0);
+  }, [customList]);
+
+  const customServiceFee = 500;
+  const urgentFee = isUrgent ? 300 : 0;
+  const totalAmount = totalItemsPrice + totalMaterialPrice + customServiceFee + urgentFee;
+  const totalCustomItems = customList.reduce((sum, ci) => sum + ci.quantity, 0);
 
   const handleSizeChange = (field: string, value: string) => {
     setSizeRecord({ [field]: Number(value) || 0 });
@@ -42,15 +65,63 @@ const CustomPage: React.FC = () => {
   };
 
   const handleSubmit = () => {
+    if (customList.length === 0) {
+      Taro.showToast({ title: '请先添加定制商品', icon: 'none' });
+      return;
+    }
+    if (!customerName.trim()) {
+      Taro.showToast({ title: '请输入联系人姓名', icon: 'none' });
+      return;
+    }
+    if (!customerPhone.trim()) {
+      Taro.showToast({ title: '请输入联系电话', icon: 'none' });
+      return;
+    }
+    if (!address.trim()) {
+      Taro.showToast({ title: '请输入配送地址', icon: 'none' });
+      return;
+    }
+
     Taro.showModal({
       title: '提交定制单',
-      content: '确认提交当前定制信息吗？',
+      content: `确认提交当前定制单？\n商品 ${totalCustomItems} 件\n预估金额：${formatPrice(totalAmount)}`,
       success: (res) => {
         if (res.confirm) {
+          const newOrder = submitCustomOrder({
+            customerName: customerName.trim(),
+            customerPhone: customerPhone.trim(),
+            address: address.trim(),
+            funeralHome: funeralHome.trim() || undefined,
+            isUrgent,
+            remark: remark.trim() || undefined,
+            taboos: taboos.trim() || undefined,
+            customItems: customList,
+            sizeInfo: sizeRecord,
+            materialNames: selectedMaterials.map(m => m.name),
+            materialPrice: totalMaterialPrice
+          });
+
           Taro.showToast({ title: '定制单已提交', icon: 'success' });
+
+          setCustomerName('');
+          setCustomerPhone('');
+          setAddress('');
+          setFuneralHome('');
+          setRemark('');
+          setTaboos('');
+          setIsUrgent(false);
+          useAppStore.getState().clearCustomList();
+
+          setTimeout(() => {
+            Taro.switchTab({ url: '/pages/orders/index' });
+          }, 800);
         }
       }
     });
+  };
+
+  const goBrowse = () => {
+    Taro.switchTab({ url: '/pages/styles/index' });
   };
 
   const sizeFields = [
@@ -66,10 +137,12 @@ const CustomPage: React.FC = () => {
   ];
 
   const tabs = [
-    { key: 'size', label: '尺寸登记' },
-    { key: 'material', label: '材质选择' },
-    { key: 'match', label: '套装搭配' },
-    { key: 'taboo', label: '避讳习俗' }
+    { key: 'list', label: `清单(${totalCustomItems})` },
+    { key: 'size', label: '尺寸' },
+    { key: 'material', label: '材质' },
+    { key: 'match', label: '套装' },
+    { key: 'taboo', label: '习俗' },
+    { key: 'info', label: '信息' }
   ] as const;
 
   return (
@@ -87,6 +160,92 @@ const CustomPage: React.FC = () => {
       </View>
 
       <ScrollView scrollY className={styles.content}>
+        {activeTab === 'list' && (
+          <View className={styles.section}>
+            <View className={styles.sectionTitle}>
+              <Text className={styles.sectionIcon}>🛒</Text>
+              <Text>待定制清单（{customList.length}种，{totalCustomItems}件）</Text>
+            </View>
+            {customList.length > 0 ? (
+              <View className={styles.customList}>
+                {customList.map(item => (
+                  <View key={item.id} className={styles.customItem}>
+                    <Image className={styles.customItemImg} src={item.productImage} mode="aspectFill" />
+                    <View className={styles.customItemInfo}>
+                      <View>
+                        <Text className={styles.customItemName}>{item.productName}</Text>
+                        <Text className={styles.customItemMeta}>
+                          {item.selectedSize ? `规格：${item.selectedSize}` : '标准规格'}
+                          {' · '}加入于 {item.addedAt.split(' ')[0]}
+                        </Text>
+                      </View>
+                      <View className={styles.customItemBottom}>
+                        <Text className={styles.customItemPrice}>{formatPrice(item.price)}</Text>
+                        <View style={{ display: 'flex', alignItems: 'center', gap: '24rpx' }}>
+                          <View className={styles.qtyControl}>
+                            <View
+                              className={styles.qtyBtn}
+                              onClick={() => updateCustomItemQuantity(item.id, item.quantity - 1)}
+                            >
+                              -
+                            </View>
+                            <Text className={styles.qtyValue}>{item.quantity}</Text>
+                            <View
+                              className={styles.qtyBtn}
+                              onClick={() => updateCustomItemQuantity(item.id, item.quantity + 1)}
+                            >
+                              +
+                            </View>
+                          </View>
+                          <Text className={styles.removeBtn} onClick={() => removeCustomItem(item.id)}>
+                            移除
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className={styles.emptyCustom}>
+                <Text className={styles.emptyCustomIcon}>🛒</Text>
+                <Text className={styles.emptyCustomText}>暂无待定制商品，快去挑选款式吧</Text>
+                <View className={styles.browseBtn} onClick={goBrowse}>
+                  去挑选款式
+                </View>
+              </View>
+            )}
+            {customList.length > 0 && (
+              <View className={styles.priceBreakdown} style={{ marginTop: '32rpx' }}>
+                <View className={styles.priceLine}>
+                  <Text>商品小计</Text>
+                  <Text>{formatPrice(totalItemsPrice)}</Text>
+                </View>
+                {selectedMaterials.length > 0 && (
+                  <View className={styles.priceLine}>
+                    <Text>材质费用（{selectedMaterials.length}种）</Text>
+                    <Text>{formatPrice(totalMaterialPrice)}</Text>
+                  </View>
+                )}
+                <View className={styles.priceLine}>
+                  <Text>定制服务费</Text>
+                  <Text>{formatPrice(customServiceFee)}</Text>
+                </View>
+                {isUrgent && (
+                  <View className={styles.priceLine}>
+                    <Text>加急费用</Text>
+                    <Text style={{ color: '#A33D3D' }}>{formatPrice(urgentFee)}</Text>
+                  </View>
+                )}
+                <View className={classnames(styles.priceLine, styles.priceLineTotal)}>
+                  <Text>预估总金额</Text>
+                  <Text>{formatPrice(totalAmount)}</Text>
+                </View>
+              </View>
+            )}
+          </View>
+        )}
+
         {activeTab === 'size' && (
           <>
             <View className={styles.section}>
@@ -200,22 +359,20 @@ const CustomPage: React.FC = () => {
               </View>
             </View>
 
-            {selectedMaterialIds.length > 0 && (
+            {selectedMaterials.length > 0 && (
               <View className={styles.section}>
                 <View className={styles.sectionTitle}>
                   <Text className={styles.sectionIcon}>✅</Text>
-                  <Text>已选材质（{selectedMaterialIds.length}）</Text>
+                  <Text>已选材质（{selectedMaterials.length}）</Text>
                 </View>
                 <View className={styles.selectedList}>
-                  {materials
-                    .filter(m => selectedMaterialIds.includes(m.id))
-                    .map(m => (
-                      <View key={m.id} className={styles.selectedItem}>
-                        <Text className={styles.selectedName}>{m.name}</Text>
-                        <Text className={styles.selectedPrice}>{formatPrice(m.price)}/{m.unit}</Text>
-                        <Text className={styles.selectedRemove} onClick={() => toggleMaterialId(m.id)}>移除</Text>
-                      </View>
-                    ))}
+                  {selectedMaterials.map(m => (
+                    <View key={m.id} className={styles.selectedItem}>
+                      <Text className={styles.selectedName}>{m.name}</Text>
+                      <Text className={styles.selectedPrice}>{formatPrice(m.price)}/{m.unit}</Text>
+                      <Text className={styles.selectedRemove} onClick={() => toggleMaterialId(m.id)}>移除</Text>
+                    </View>
+                  ))}
                 </View>
               </View>
             )}
@@ -282,12 +439,145 @@ const CustomPage: React.FC = () => {
             ))}
           </View>
         )}
+
+        {activeTab === 'info' && (
+          <>
+            <View className={styles.section}>
+              <View className={styles.sectionTitle}>
+                <Text className={styles.sectionIcon}>🚨</Text>
+                <Text>加急处理</Text>
+              </View>
+              <View className={styles.urgentRow}>
+                <View className={styles.urgentInfo}>
+                  <View>
+                    <Text className={styles.urgentText}>⚡ 加急配送</Text>
+                    <Text className={styles.urgentDesc}>开启后24小时内完成，加急费{formatPrice(300)}</Text>
+                  </View>
+                </View>
+                <View
+                  className={classnames(styles.switchWrap, isUrgent && styles.switchWrapActive)}
+                  onClick={() => setIsUrgent(!isUrgent)}
+                >
+                  <View className={classnames(styles.switchDot, isUrgent && styles.switchDotActive)} />
+                </View>
+              </View>
+            </View>
+
+            <View className={styles.section}>
+              <View className={styles.sectionTitle}>
+                <Text className={styles.sectionIcon}>👤</Text>
+                <Text>联系人信息</Text>
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>联系人姓名 *</Text>
+                <View className={styles.formInput}>
+                  <Input
+                    placeholder="请输入联系人姓名"
+                    value={customerName}
+                    onInput={(e) => setCustomerName(e.detail.value)}
+                  />
+                </View>
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>联系电话 *</Text>
+                <View className={styles.formInput}>
+                  <Input
+                    type="phone"
+                    placeholder="请输入联系电话"
+                    value={customerPhone}
+                    onInput={(e) => setCustomerPhone(e.detail.value)}
+                  />
+                </View>
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>配送地址 *</Text>
+                <View className={styles.formTextarea}>
+                  <Textarea
+                    placeholder="请输入详细配送地址"
+                    value={address}
+                    onInput={(e) => setAddress(e.detail.value)}
+                  />
+                </View>
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>殡仪馆（选填）</Text>
+                <View className={styles.formInput}>
+                  <Input
+                    placeholder="如配送至殡仪馆请填写名称"
+                    value={funeralHome}
+                    onInput={(e) => setFuneralHome(e.detail.value)}
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View className={styles.section}>
+              <View className={styles.sectionTitle}>
+                <Text className={styles.sectionIcon}>📝</Text>
+                <Text>备注与避讳</Text>
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>特殊要求（选填）</Text>
+                <View className={styles.formTextarea}>
+                  <Textarea
+                    placeholder="如有特殊要求请备注"
+                    value={remark}
+                    onInput={(e) => setRemark(e.detail.value)}
+                  />
+                </View>
+              </View>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>避讳习俗（选填）</Text>
+                <View className={styles.formTextarea}>
+                  <Textarea
+                    placeholder="如避讳某些颜色、材质、图案等"
+                    value={taboos}
+                    onInput={(e) => setTaboos(e.detail.value)}
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View className={styles.section}>
+              <View className={styles.sectionTitle}>
+                <Text className={styles.sectionIcon}>💰</Text>
+                <Text>费用明细</Text>
+              </View>
+              <View className={styles.priceBreakdown}>
+                <View className={styles.priceLine}>
+                  <Text>商品（{totalCustomItems}件）</Text>
+                  <Text>{formatPrice(totalItemsPrice)}</Text>
+                </View>
+                {selectedMaterials.length > 0 && (
+                  <View className={styles.priceLine}>
+                    <Text>材质（{selectedMaterials.length}种）</Text>
+                    <Text>{formatPrice(totalMaterialPrice)}</Text>
+                  </View>
+                )}
+                <View className={styles.priceLine}>
+                  <Text>定制服务费</Text>
+                  <Text>{formatPrice(customServiceFee)}</Text>
+                </View>
+                {isUrgent && (
+                  <View className={styles.priceLine}>
+                    <Text>加急费</Text>
+                    <Text style={{ color: '#A33D3D' }}>{formatPrice(urgentFee)}</Text>
+                  </View>
+                )}
+                <View className={classnames(styles.priceLine, styles.priceLineTotal)}>
+                  <Text>预估总金额</Text>
+                  <Text>{formatPrice(totalAmount)}</Text>
+                </View>
+              </View>
+            </View>
+          </>
+        )}
       </ScrollView>
 
       <View className={styles.bottomBar}>
         <View className={styles.priceInfo}>
           <Text className={styles.priceLabel}>预估定制费用</Text>
-          <Text className={styles.priceValue}>{formatPrice(totalMaterialPrice + 500)}</Text>
+          <Text className={styles.priceValue}>{formatPrice(totalAmount)}</Text>
         </View>
         <View className={styles.submitBtn} onClick={handleSubmit}>
           提交定制单
